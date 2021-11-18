@@ -1,0 +1,49 @@
+# Alquimia Stone
+
+## Programação Funcional
+
+### Principais Características
+
+* Funções puras
+* Funções de ordem maior
+* Imutabilidade de dados
+* Sem efeitos colaterais
+* Paradigma declarativo
+
+### Funções Puras
+
+São funções cujo resultado é sempre igual para o mesmo conjunto de argumentos.
+Isso significa que funções puras não podem ter efeitos colaterais e 
+também não podem guardar estado.
+
+### Funções de Ordem Maior
+
+São funções que podem receber outras funções como argumento ou retorná-las como resultado
+
+### Imutabilidade de Dados
+
+No paradigma funcional, tudo pode ser representado por funções, e todas funções são puras.
+Portanto, todo dado é imutável. Isso facilita o compartilhamento de memória e dados entre
+partes distintas de um _software_.
+
+### Sem Efeitos Colaterais
+
+Efeitos colaterais significam que uma função tem consequências escondidas, que não podem ser
+representadas pela sua interface de entrada e de saída. Com isso, não necessariamente uma
+função retorna sempre o mesmo resultado para um dado conjunto de entradas.
+
+### Paradigma Declarativo
+
+Em programação funcional, é costumeiro usar o paradigma declarativo.
+No paradigma declarativo, em vez de focar em _como_ o computador executará
+um trecho de código, a pessoa desenvolvedora foca em explicitar _o que_ deve
+ser feito.
+
+## Referências
+
+* [1] - https://www.alura.com.br/artigos/programacao-funcional-o-que-e-
+* [2] - http://tutorials.jenkov.com/java-functional-programming/index.html
+* [3] - http://www.cplusplus.com/reference/functional/
+* [4] - https://docs.python.org/3/howto/functional.html
+* [5] - [https://en.wikipedia.org/wiki/Actor_model
+* [6] - https://www.erlang.org/blog/a-brief-beam-primer/

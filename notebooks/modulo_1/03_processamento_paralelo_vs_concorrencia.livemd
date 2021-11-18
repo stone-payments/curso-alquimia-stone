@@ -1,0 +1,26 @@
+# Alquimia Stone
+
+## Processamento Paralelo vs Concorrente
+
+A diferença entre processamento paralelo e processamento concorrente diz respeito a compartilhamento de recursos.
+
+Processamento paralelo é quando um programa consegue executar dois trechos de código sem
+compartilhamento de recursos (processador, memória, disco, etc).
+Caso contrário, há competição entre duas unidades do programa por um mesmo recurso, o que caracteriza concorrência.
+
+Em um computador pessoal atual, pode haver vários núcleos de processador, várias unidades de memória e de disco. Com isso, o processamento pode ser quase paralelo.
+Entretanto, canais compartilhados geram concorrência.
+
+O processamento concorrente nos computadores atuais se dá através de processos ou de _threads_.
+
+Processo é um contexto de execução de código. Processos não compartilham memória entre si.
+_Thread_ é uma subdivisão de um processo e pode compartilhar memória com outras _threads_ de um mesmo processo.
+Além disso, processos tendem a ser mais _pesados_ que _threads_.
+
+O gerenciamento de processos e de threads se dá através de escalonadores (_schedulers_).
+
+## Referências
+
+* [1] - https://medium.com/@itIsMadhavan/concurrency-vs-parallelism-a-brief-review-b337c8dac350
+* [2] - https://www.erlang.org/doc/getting_started/conc_prog.html
+* [3] - https://www.guru99.com/difference-between-process-and-thread.html

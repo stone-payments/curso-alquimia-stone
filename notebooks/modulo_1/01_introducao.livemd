@@ -1,0 +1,21 @@
+# Alquimia Stone
+
+## Introdução
+
+### Temas abordados no curso
+
+* Introdução a Elixir
+* Ecto e Bancos de Dados
+* Phoenix e Redes de Computadores
+
+## O que é Elixir?
+
+Linguagem de programação brasileira, criada por José Valim
+
+Site oficial: [http://elixir-lang.org](http://elixir-lang.org)
+
+Principais características:
+
+* Programação Funcional
+* Modelo de atores através da BEAM (máquina virtual Erlang)
+* Alta capacidade de processamento concorrente

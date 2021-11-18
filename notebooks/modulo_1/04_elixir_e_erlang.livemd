@@ -1,0 +1,23 @@
+# Alquimia Stone
+
+## Elixir e Erlang
+
+### Erlang
+
+* Linguagem de programação funcional criada na Ericsson na década de 1980
+* Fornece um modelo de processamento concorrente tolerante a falhas, através do modelo de Atores
+* Programas são executados como processos na máquina virtual Erlang, a BEAM.
+* Processos podem ser supervisionados
+
+### Elixir
+
+* Também funciona sobre a BEAM
+* Sintaxe distinta e funcionalides adicionais sobre o Erlang
+* Código é compilado para o mesmo nível de abstração que Erlang compila
+* Pode invocar código Erlang nativamente
+
+## Referências
+
+* [1] - [https://elixir-lang.org](https://elixir-lang.org)
+* [2] - [https://www.erlang.org/doc/reference_manual/processes.html](https://www.erlang.org/doc/reference_manual/processes.html)
+* [3] - [https://www.erlang.org/faq/academic.html](https://www.erlang.org/faq/academic.html)

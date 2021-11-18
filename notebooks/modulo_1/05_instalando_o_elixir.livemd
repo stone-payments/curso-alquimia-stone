@@ -1,0 +1,46 @@
+# Alquimia Stone
+
+## Instalando Elixir
+
+Neste capítulo instalaremos as versões mais recentes de Elixir e Erlang.
+Utilizaremos asdf-vm ([https://github.com/asdf-vm/asdf](https://github.com/asdf-vm/asdf)) como gerenciador de versões para o Elixir e para o Erlang
+
+### Instalando o ASDF
+
+A página _getting started_ ([http://asdf-vm.com/guide/getting-started.html#_1-install-dependencies](http://asdf-vm.com/guide/getting-started.html#_1-install-dependencies)) do asdf-vm indica o passo a passo para instalar no Linux e no macOS.
+É importante prestar atenção sobre a combinação de gerenciador de pacotes e shell escolhidos.
+No exemplo, utilizamos `zsh` e `git` como método de instalação.
+
+### Adicionando o plugin Erlang e instalando o Erlang
+
+O comando `asdf plugin-add erlang` adiciona o plugin Erlang do asdf-vm.
+
+É necessário adicionar algumas dependências de acordo com o guia: [https://github.com/asdf-vm/asdf-erlang#install](https://github.com/asdf-vm/asdf-erlang#install)
+Após a instalação, basta executar `asdf install erlang <version>`, onde `<version>` é a versão desejada.
+No exemplo, escolhemos `24.1.5`, a versão estável mais recente na data da gravação.
+
+Finalmente, precisamos configurar a versão globalmente com `asdf global erlang 24.1.5`
+
+### Adicionando o plugin Elixir e instalando o Elixir
+
+O comando `asdf plugin-add elixir` adiciona o plugin Elixir do asdf-vm.
+
+Não é necessário adicionar novas dependências, mas é necessário ter uma versão compatível do Erlang instalada.
+Para instalar, basta executar `asdf install elixir <version>`, onde `<version>` é a versão desejada do Elixir.
+No exemplo, escolhemos `1.12.3-otp-24`, a versão estável mais recente na data da gravação.
+
+Finalmente, precisamos configurar a versão globalmente com `asdf global elixir 1.12.3-otp-24`
+
+### Primeiro Programa em Elixir
+
+Para executar o primeiro comando em Elixir, podemos utilizar o `iex`, o REPL do Elixir.
+
+```shell
+$ iex
+Erlang/OTP 24 [erts-12.1.5] [source] [64-bit] [smp:8:8] [ds:8:8:10] [async-threads:1] [jit]
+
+Interactive Elixir (1.12.3) - press Ctrl+C to exit (type h() ENTER for help)
+iex(1)> IO.puts("Olá, Alquimia Stone!")
+Olá, Alquimia Stone!
+:ok
+```
