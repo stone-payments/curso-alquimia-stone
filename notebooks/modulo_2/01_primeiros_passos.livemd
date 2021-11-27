@@ -1,0 +1,506 @@
+# Módulo II
+
+## Interactive Elixir (IEx)
+
+```elixir
+import IEx.Helpers
+```
+
+```elixir
+h(String.to_integer())
+```
+
+```elixir
+i("string")
+```
+
+```elixir
+i("520")
+```
+
+```elixir
+i(520)
+```
+
+```elixir
+i(fn -> IO.puts("ok") end)
+```
+
+<!-- livebook:{"force_markdown":true} -->
+
+```elixir
+iex(1)> "primeiro resultado"
+"primeiro resultado"
+iex(2)> nil
+nil
+iex(3)> v(1)
+"primeiro resultado"
+iex(4)> 
+nil
+iex(5)> "quinto resultado"
+"quinto resultado"
+iex(6)> v(-1)
+"quinto resultado"
+iex(7)> v == v(-1)
+true
+
+```
+
+## Tipos básicos
+
+Integer
+
+```elixir
+# PASSAGEM POR VALOR
+number = 10
+second_number = number
+number = 20
+
+second_number
+```
+
+```elixir
+Integer.to_string(28)
+```
+
+```elixir
+Integer.parse("10.05")
+```
+
+```elixir
+20 / 2
+```
+
+Float
+
+```elixir
+float_number = 10.0
+```
+
+```elixir
+Float.round(20.5)
+```
+
+```elixir
+Float.ceil(10.1) |> IO.inspect()
+Float.floor(10.1) |> IO.inspect()
+```
+
+Binários e Hexadecimais
+
+```elixir
+0xF == 0b1111
+```
+
+String
+
+```elixir
+my_string = "isso é uma string"
+```
+
+```elixir
+not_a_string = 'isso não é uma string'
+```
+
+```elixir
+is_binary(not_a_string)
+```
+
+```elixir
+String.valid?("isso é uma string")
+```
+
+```elixir
+"A melhor série de tv de todos os tempos é" <> " Breaking Bad"
+```
+
+```elixir
+string_to_interpolate = "Breaking Bad"
+
+"A melhor série de tv de todos os tempos é #{string_to_interpolate}"
+```
+
+```elixir
+idade_do_harry_potter = 11
+
+"Harry Potters age in first book is #{idade_do_harry_potter}"
+```
+
+```elixir
+String.length("Um reino tão, tão distante")
+```
+
+```elixir
+String.contains?("74219740972194719", "197")
+```
+
+```elixir
+String.upcase("vida longa ao Elixir")
+```
+
+```elixir
+String.downcase("SHHHHH")
+```
+
+Charlists
+
+```elixir
+list = 'isto é uma charlist'
+```
+
+```elixir
+'a' == [97]
+```
+
+```elixir
+String.Chars.to_string('para virar uma string')
+```
+
+Bitstrings
+
+```elixir
+<<97>> == "a"
+```
+
+```elixir
+"a" <> <<0>>
+```
+
+```elixir
+<<97>> == <<97::8>>
+```
+
+```elixir
+inspect(<<3::4>>)
+```
+
+Binaries
+
+```elixir
+is_binary(<<97::8>>)
+```
+
+```elixir
+is_binary(<<5::4>>)
+```
+
+```elixir
+is_bitstring(<<5::4>>)
+```
+
+```elixir
+is_binary("every string is a binary")
+```
+
+Atoms
+
+```elixir
+:atom
+```
+
+```elixir
+is_atom(:atom)
+```
+
+```elixir
+also_an_atom = :AlsoAnAtom
+is_atom(also_an_atom)
+```
+
+```elixir
+defmodule MyModule do
+end
+
+is_atom(MyModule)
+```
+
+```elixir
+String.to_atom("my_string")
+```
+
+```elixir
+String.to_existing_atom("not_usable")
+```
+
+```elixir
+:not_usable
+String.to_existing_atom("not_usable")
+```
+
+Booleanos
+
+```elixir
+true == true
+```
+
+```elixir
+false == false
+```
+
+```elixir
+if nil, do: :ok, else: :not_ok
+```
+
+```elixir
+if "5", do: :ok, else: :not_ok
+```
+
+Listas
+
+```elixir
+good_the_office_seasons = [1, 2, 3, 4, 5, 6, 7]
+```
+
+```elixir
+all_the_office_seasons = good_the_office_seasons ++ [7, 8]
+```
+
+```elixir
+bad_the_office_seasons = all_the_office_seasons -- good_the_office_seasons
+```
+
+```elixir
+good_the_office_seasons -- all_the_office_seasons
+```
+
+```elixir
+first_season = hd(all_the_office_seasons)
+```
+
+```elixir
+remaining_seasons = tl(all_the_office_seasons)
+```
+
+```elixir
+[first | remaining] = all_the_office_seasons
+
+first
+```
+
+```elixir
+remaining
+```
+
+```elixir
+["a" | ["b", "c", "d"]]
+```
+
+```elixir
+[1 | [2 | [3 | []]]] === [1, 2, 3]
+```
+
+```elixir
+List.flatten([1, ["b"], [:ok, [""]]]) |> IO.inspect()
+
+List.last(["first", "second", "last"]) |> IO.inspect()
+
+List.first(["first", "second", "last"]) |> IO.inspect()
+
+List.delete(["a", "b", "c"], "a") |> IO.inspect()
+
+List.to_tuple([:error, :not_found])
+```
+
+Tuples
+
+```elixir
+name_in = fn name ->
+  if name in ["Lucas", "Pedro", "João"], do: {:ok, name}, else: {:error, :not_found}
+end
+
+name_in.("Lucas")
+```
+
+```elixir
+Tuple.to_list({1, 5, 100})
+```
+
+```elixir
+Tuple.append({"Naruto", "Sasuke", "Sakura"}, "Kakashi")
+```
+
+Keyword Lists
+
+```elixir
+kl = [name: "John", lastname: "McClane"]
+
+[name: "John", lastname: "McClane"] == []
+
+# [name: "John", lastname: "McClane", lastname: "McAvoy"]
+
+[{:name, "John"}, {:lastname, "McClane"}] == [name: "John", lastname: "McClane"]
+```
+
+Maps
+
+```elixir
+IO.inspect(%{:a => 5} == %{a: 5})
+
+%{1 => 5}
+
+%{"name" => "Michael", "name" => "Mikael"}
+```
+
+```elixir
+# Map functions
+my_map = Map.new(a: 5, b: 10)
+
+my_map = Map.put(my_map, :c, 15)
+
+value = Map.get(my_map, :a)
+value == my_map[:a]
+value == my_map.a
+
+Map.has_key?(my_map, :d)
+
+Map.drop(my_map, [:a, :c])
+
+Map.update(my_map, :a, 1, fn value -> value * 2 end)
+
+Map.take(my_map, [:a, :b])
+```
+
+## Operadores
+
+Operadores aritméticos
+
+```elixir
+10 + 20
+```
+
+```elixir
+350 - 15
+```
+
+```elixir
+350.0 - 12
+```
+
+```elixir
+50 + 100.0
+```
+
+```elixir
+50 * 20
+```
+
+```elixir
+50 / 10
+```
+
+```elixir
+div(50, 10)
+```
+
+```elixir
+rem(10, 3)
+```
+
+Operadores boleanos
+
+```elixir
+# Operador and
+true and false
+```
+
+```elixir
+true and true
+```
+
+```elixir
+# Operador or
+false or false
+```
+
+```elixir
+true or false
+```
+
+```elixir
+# Operador not
+not true
+```
+
+```elixir
+not_a_string = not String.valid?("string")
+```
+
+```elixir
+# AND
+false && ""
+```
+
+```elixir
+"" && 15
+```
+
+```elixir
+15 && ""
+```
+
+```elixir
+# OR
+nil || 100
+```
+
+```elixir
+false || 'charlist'
+```
+
+```elixir
+nil || false
+```
+
+```elixir
+false || nil
+```
+
+```elixir
+# NOT
+!1
+```
+
+```elixir
+!nil
+```
+
+Operadores de comparação
+
+==, !=, ===, !==, <=, >=, <, >
+
+```elixir
+10 != 10
+```
+
+```elixir
+10 == 10
+```
+
+```elixir
+10.0 == 10
+```
+
+```elixir
+10.0 === 10
+```
+
+```elixir
+11 >= 10
+```
+
+```elixir
+10 <= 10
+```
+
+```elixir
+20 > 30
+```
+
+```elixir
+11 < 12
+```
+
+```elixir
+# number < atom < reference < function < port < pid < tuple < map < list < bitstring
+<<0>> > []
+```

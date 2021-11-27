@@ -1,0 +1,230 @@
+# Módulo II
+
+## Módulos e funções
+
+```elixir
+defmodule Math do
+  @moduledoc """
+  Documentation explaining the logic contained in this module.
+  """
+
+  @doc """
+  Sums two numbers.
+  """
+  @spec sum(a :: Integer.t(), b :: Integer.t()) :: Integer.t()
+  def sum(a, b), do: a + b
+
+  @doc """
+  Subtracts second number from first.
+  """
+  @spec sum(Integer.t(), Integer.t()) :: Integer.t()
+  def sub(a, b), do: do_sub(a, b)
+
+  @doc false
+  def do_sub(a, b), do: a - b
+
+  def mult(a, b \\ 1), do: a * b
+
+  def int_div(a, b), do: div(a, b)
+end
+```
+
+```elixir
+Math.sum(0, 50)
+```
+
+```elixir
+Math.sub(15, 30)
+```
+
+```elixir
+Math.mult(100)
+```
+
+```elixir
+Math.mult(100, 10)
+```
+
+```elixir
+Math.int_div(10, 3)
+```
+
+```elixir
+output_fun = fn string -> IO.puts("#{string}") end
+```
+
+```elixir
+output_fun = &IO.puts(&1)
+```
+
+Pipe Operator
+
+```elixir
+Integer.to_string(String.to_integer("15"))
+```
+
+```elixir
+"15"
+|> String.to_integer()
+|> Integer.to_string()
+```
+
+```elixir
+require Integer
+
+15
+|> Integer.is_odd()
+|> if(do: "Integer is odd", else: "Integer is even")
+```
+
+Recursão e tail-call optimization
+
+```elixir
+defmodule MyRecursionModule do
+  def non_optimized_factorial(0), do: 1
+  def non_optimized_factorial(n), do: n * non_optimized_factorial(n - 1)
+
+  def optimized_factorial(n, acc \\ 1)
+  def optimized_factorial(0, acc), do: 1 * acc
+  def optimized_factorial(n, acc), do: optimized_factorial(n - 1, acc * n)
+end
+```
+
+Controle de Fluxo
+
+```elixir
+# IF
+if String.valid?("") do
+  {:ok, :valid_string}
+else
+  {:error, :invalid_string}
+end
+```
+
+```elixir
+best_sitcoms = ["seinfeld", "friends", "how I met your mother", "brooklyn 99"]
+
+if "friends" in best_sitcoms, do: :one_of_the_bests, else: :not_that_great
+```
+
+```elixir
+# CASE 
+user = %{name: "Matheus", age: 26}
+
+validate_allowed_to_drive_age = fn user ->
+  case user do
+    %{age: age} when age >= 18 -> :allowed_to_drive
+    _ -> :not_allowed
+  end
+end
+
+validate_allowed_to_drive_age.(user)
+```
+
+```elixir
+# WITH
+defmodule USTravels do
+  @moduledoc "Concentrates international travels to US relocation"
+
+  @spec relocate(user :: map()) :: {:ok, map()}
+  def relocate(user) do
+    with need_tutor? <- need_tutor?(user),
+         :ok <- validate_tutor(need_tutor?, user),
+         {:visa, :ok} <- {:visa, validate_visa(user)},
+         {:covid19_vaccine, :ok} <- {:covid19_vaccine, validate_covid_vaccine(user)} do
+      {:ok, Map.put(user, :current_country, :usa)}
+    else
+      :not_old_enough_tutor ->
+        {:error, :not_old_enough_tutor}
+
+      _ ->
+        :error
+    end
+  end
+
+  defp need_tutor?(%{age: age}) when age <= 14, do: true
+  defp need_tutor?(_), do: false
+
+  defp validate_tutor(false, _), do: :ok
+
+  defp validate_tutor(true, user) do
+    if user.tutor.age >= 18, do: :ok, else: :not_old_enough_tutor
+  end
+
+  defp validate_visa(%{visa: %{countries: countries}}), do: :usa in countries
+
+  defp validate_covid_vaccine(%{vaccines: vaccines}) do
+    vaccines
+    |> Map.get(:covid_19)
+    |> case do
+      nil -> :user_not_vaccinated
+      _ -> :ok
+    end
+  end
+end
+```
+
+```elixir
+# COND
+cond do
+  is_binary("string") -> :string_is_binary
+  1 < 100 -> :lower
+  true -> :all_previous_are_false
+end
+```
+
+## Módulos Enum e Stream
+
+Enum
+
+```elixir
+Enum.map([10, 30, 51], fn num -> num * 2 end)
+```
+
+```elixir
+Enum.map([10, 30, 51], &(&1 * 2))
+```
+
+```elixir
+shopping_cart = [
+  %{name: "Coca Cola 2L", price: 1000},
+  %{name: "Frango 1kg", price: 2500},
+  %{name: "Água 1,5L", price: 300}
+]
+
+Enum.reduce(shopping_cart, 0, fn item, acc ->
+  acc + item.price
+end)
+```
+
+```elixir
+friends = [
+  %{name: "Renato", age: 18},
+  %{name: "Bruno", age: 16},
+  %{name: "Matheus", age: 18}
+]
+
+Enum.filter(friends, fn friend -> friend.age >= 18 end)
+```
+
+```elixir
+Enum.all?(friends, fn friend -> friend.age > 18 end)
+```
+
+```elixir
+Enum.at(friends, 2) == Enum.at(friends, -1)
+```
+
+```elixir
+Enum.random([1, 10, 25, -12, 100, -250])
+```
+
+Stream
+
+```elixir
+Enum.map([1, 10, 25, -12, 100, -250], fn num -> IO.inspect(num) end)
+```
+
+```elixir
+Stream.map([1, 10, 25, -12, 100, -250], fn num -> num * 2 end)
+```
