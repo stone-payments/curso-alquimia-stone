@@ -1,0 +1,176 @@
+# Configuração
+
+## Mix
+
+É a ferramenta de criação de gerenciamento de projetos que vem junto com o Elixir.
+Neste módulo, vamos conectar nossos Livebooks a um projeto Mix criado conforme descrito a seguir.
+
+A aplicação de exemplo foi gerada com o comando:
+
+```elixir
+mix(new(ecto_example -- sup))
+```
+
+## 1. Adicionar as seguintes dependências ao mix.exs:
+
+```elixir
+defp deps do
+  [
+    {:ecto_sql, "~> 3.0"},
+    {:postgrex, ">= 0.0.0"}
+  ]
+end
+```
+
+## 2. Instalar dependências:
+
+```shell
+mix deps.get
+```
+
+## 3. Gerar um Repo
+
+Na nossa aplicação de exemplo vamos nos conectar a várias bases de dados, vamos criar um repo para cada uma delas.
+
+```shell
+mix ecto.gen.repo -r EctoExample.Hospital.Repo
+```
+
+```shell
+mix ecto.gen.repo -r EctoExample.DriverLicenses.Repo
+```
+
+```shell
+mix ecto.gen.repo -r EctoExample.University.Repo
+```
+
+```shell
+mix ecto.gen.repo -r EctoExample.MovieReviews.Repo
+```
+
+## 4. Adicionar repos à árvore de supervisão
+
+```elixir
+defmodule EctoExample.Application do
+  # See https://hexdocs.pm/elixir/Application.html
+  # for more information on OTP Enrollments
+  @moduledoc false
+
+  use Application
+
+  def start(_type, _args) do
+    children = [
+      EctoExample.Hospital.Repo,
+      EctoExample.DriverLicenses.Repo,
+      EctoExample.University.Repo,
+      EctoExample.MovieReviews.Repo
+    ]
+
+    opts = [strategy: :one_for_one, name: EctoExample.Supervisor]
+    Supervisor.start_link(children, opts)
+  end
+end
+```
+
+## 5. Configurar aplicação:
+
+Em `config.exs`:
+
+### 5.1 Definir configuração básica dos Repos:
+
+Na nossa aplicação de exemplo vamos nos conectar a várias bases de dados.
+
+```elixir
+config :ecto_example, EctoExample.Hospital.Repo,
+  database: System.get_env("DATABASE_NAME", "hospital_database"),
+  username: System.get_env("DATABASE_USERNAME", "postgres"),
+  password: System.get_env("DATABASE_PASSWORD", "postgres"),
+  hostname: System.get_env("DATABASE_HOST", "localhost"),
+  priv: "priv/hospital"
+```
+
+```elixir
+config :ecto_example, EctoExample.DriverLicenses.Repo,
+  database: System.get_env("DATABASE_NAME", "driver_licenses_database"),
+  username: System.get_env("DATABASE_USERNAME", "postgres"),
+  password: System.get_env("DATABASE_PASSWORD", "postgres"),
+  hostname: System.get_env("DATABASE_HOST", "localhost"),
+  priv: "priv/driver_licenses"
+```
+
+```elixir
+config :ecto_example, EctoExample.University.Repo,
+  database: System.get_env("DATABASE_NAME", "university_database"),
+  username: System.get_env("DATABASE_USERNAME", "postgres"),
+  password: System.get_env("DATABASE_PASSWORD", "postgres"),
+  hostname: System.get_env("DATABASE_HOST", "localhost"),
+  priv: "priv/university"
+```
+
+```elixir
+config :ecto_example, EctoExample.MovieReviews.Repo,
+  database: System.get_env("DATABASE_NAME", "movie_reviews_database"),
+  username: System.get_env("DATABASE_USERNAME", "postgres"),
+  password: System.get_env("DATABASE_PASSWORD", "postgres"),
+  hostname: System.get_env("DATABASE_HOST", "localhost"),
+  priv: "priv/movie_reviews"
+```
+
+### 5.2 Adicionar Repo aos repos da aplicação:
+
+Em `config/config.exs`:
+
+```elixir
+config :ecto_example,
+  ecto_repos: [
+    EctoExample.Hospital.Repo,
+    EctoExample.DriverLicenses.Repo,
+    EctoExample.University.Repo,
+    EctoExample.MovieReviews.Repo
+  ]
+```
+
+### Outras configurações importantes:
+
+* `:priv`: Diretório onde ficam armazenadas as migrations que geram o schema do seu banco de dados. Por padrão, estão localizadas em `priv/repo`
+
+* `:log`: - o quão verboso você deseja que o logger do Elixir seja. Se estiver configurado para `false` desabilita completamente os logs em seu repositório Ecto. Por padrão está configurado em `:debug`
+
+* `:pool_size`: Número de conexões que podem ser utilizadas pelo pool de conexões. Um pool de conexões serve para reaproveitar conexões de forma segura e limpa. Seu valor padrão é `10`
+
+* `:timeout`: Tempo máximo em milissegundos que o Ecto vai esperar para uma query terminar. Seu valor padrão é `15_000`. Se estiver configurado para `:infinity` espera por um tempo indefinido o que não costuma ser um comportamento desejável em ambiente de produção.
+
+### 6. Criar banco de dados
+
+```shell
+mix ecto.create
+```
+
+### 7. Testar configuração
+
+```elixir
+EctoExample.University.Repo.query!("select 1")
+```
+
+Esse exemplo mostra como executar SQL puro através do Repo do Ecto.
+
+Se a aplicação não conseguir se conectar ao banco de dados, não será possível subí-la. O Ecto vai tentar se conectar automaticamente algumas vezes até abortar a execução da sua aplicação.
+
+### 8. Comandos úteis do Ecto
+
+```shell
+mix ecto.migrate # executa as migrations declaradas na pasta priv/<repo>
+mix ecto # lista todos os comandos do ecto
+mix ecto.drop          # Remove o banco de dados
+mix ecto.dump          # Gera um script sql com todas as tabelas e dados do seu banco de dados
+mix ecto.gen.migration # Gera um novo arquivo de migration no diretório especificado em priv
+mix ecto.gen.repo      # Gera um novo módulo de repositório
+mix ecto.load          # Carrega um script sql no seu banco de dados
+mix ecto.migrations    # Mostra o status de cada migration no banco de dados
+mix ecto.rollback      # Reverte o banco para uma versão anterior
+```
+
+## Referências:
+
+* Ecto.Repo - [https://hexdocs.pm/ecto/Ecto.Repo.html](https://hexdocs.pm/ecto/Ecto.Repo.html)
+* Supervisor and Application - [https://elixir-lang.org/getting-started/mix-otp/supervisor-and-application.html](https://elixir-lang.org/getting-started/mix-otp/supervisor-and-application.html)

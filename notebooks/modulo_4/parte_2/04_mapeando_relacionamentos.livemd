@@ -1,0 +1,365 @@
+# Mapeando relacionamentos
+
+## Mapeando relacionamentos
+
+Nós conseguimos mapear nossas tabelas do banco de dados no Ecto através da macro `Ecto.Schema`
+
+### Mapeando relacionamentos nos schemas
+
+#### 1:1
+
+![hospital](https://user-images.githubusercontent.com/16248004/141204042-584660d3-2e85-4176-b3e3-03852eac775d.png)
+
+```elixir
+defmodule EctoExample.Hospital.Schemas.Patient do
+  use Ecto.Schema
+
+  alias EctoExample.Hospital.Schemas.Room
+
+  schema "patients" do
+    field(:first_name, :string)
+    field(:last_name, :string)
+
+    has_one(:room, Room)
+
+    timestamps()
+  end
+end
+```
+
+```elixir
+defmodule EctoExample.Hospital.Schemas.Room do
+  use Ecto.Schema
+
+  alias EctoExample.Hospital.Schemas.Patient
+
+  schema "rooms" do
+    field(:floor, :string)
+    field(:number, :string)
+
+    belongs_to(:patient, Patient)
+
+    timestamps()
+  end
+end
+```
+
+```shell
+mix ecto.gen.migration create_patients -r EctoExample.Hospital.Repo
+```
+
+```elixir
+defmodule EctoExample.Hospital.Repo.Migrations.CreatePatients do
+  use Ecto.Migration
+
+  def change do
+    create table("patients") do
+      add(:first_name, :string)
+      add(:last_name, :string)
+      timestamps()
+    end
+  end
+end
+```
+
+```shell
+mix ecto.gen.migration create_rooms -r EctoExample.Hospital.Repo
+```
+
+```elixir
+defmodule EctoExample.Hospital.Repo.Migrations.CreateRooms do
+  use Ecto.Migration
+
+  def change do
+    create table("rooms") do
+      add(:floor, :string)
+      add(:number, :string)
+      timestamps()
+    end
+  end
+end
+```
+
+#### 1:n
+
+![driver_licenses](https://user-images.githubusercontent.com/16248004/142182711-ff2222cb-ed16-48c6-83df-37da73346c7a.png)
+
+```elixir
+defmodule EctoExample.Hospital.Schemas.Driver do
+  use Ecto.Schema
+
+  alias EctoExample.DriverLicenses.Schemas.License
+
+  schema "drivers" do
+    field(:first_name, :string)
+    field(:last_name, :string)
+
+    has_many(:licenses, License)
+
+    timestamps()
+  end
+end
+```
+
+```elixir
+defmodule EctoExample.Hospital.Schemas.License do
+  use Ecto.Schema
+
+  alias EctoExample.DriverLicenses.Schemas.Driver
+
+  schema "licenses" do
+    field(:type, :string)
+    field(:digits, :string)
+
+    belongs_to(:driver, Driver)
+
+    timestamps()
+  end
+end
+```
+
+```shell
+mix ecto.gen.migration create_drivers -r EctoExample.DriverLicenses.Repo
+```
+
+```elixir
+defmodule EctoExample.DriverLicenses.Repo.Migrations.CreateDrivers do
+  use Ecto.Migration
+
+  def change do
+    create table("drivers") do
+      add(:first_name, :string)
+      add(:last_name, :string)
+      timestamps()
+    end
+  end
+end
+```
+
+```shell
+mix ecto.gen.migration create_licenses -r EctoExample.DriverLicenses.Repo
+```
+
+```elixir
+defmodule EctoExample.DriverLicenses.Repo.Migrations.CreateLicenses do
+  use Ecto.Migration
+
+  def change do
+    create table("licenses") do
+      add(:type, :string)
+      add(:digits, :string)
+      timestamps()
+    end
+  end
+end
+```
+
+#### n:n
+
+![movie-reviews](https://user-images.githubusercontent.com/16248004/142079315-d761efd0-0c32-4b67-9546-86f077b9a0ac.png)
+
+```elixir
+defmodule EctoExample.MovieReviews.Schemas.Movie do
+  use Ecto.Schema
+
+  alias EctoExample.MovieReviews.Schemas.Rating
+
+  schema "movies" do
+    field(:title, :string)
+    field(:director, :string)
+    field(:year, :integer)
+
+    has_many(:ratings, Rating)
+
+    timestamps()
+  end
+end
+```
+
+```elixir
+defmodule EctoExample.MovieReviews.Schemas.Reviewer do
+  use Ecto.Schema
+
+  alias EctoExample.MovieReviews.Schemas.Rating
+
+  schema "reviewers" do
+    field(:name, :string)
+
+    has_many(:ratings, Rating)
+
+    timestamps()
+  end
+end
+```
+
+```elixir
+defmodule EctoExample.MovieReviews.Schemas.Rating do
+  use Ecto.Schema
+
+  alias EctoExample.MovieReviews.Schemas.Movie
+  alias EctoExample.MovieReviews.Schemas.Reviewer
+
+  schema "ratings" do
+    field(:stars, :integer)
+
+    belongs_to(:movie, Movie)
+    belongs_to(:reviewer, Reviewer)
+
+    timestamps()
+  end
+end
+```
+
+```shell
+mix ecto.gen.migration create_movies -r EctoExample.MovieReviews.Repo
+```
+
+```elixir
+defmodule EctoExample.MovieReviews.Repo.Migrations.CreateMovies do
+  use Ecto.Migration
+
+  def change do
+    create table("movies") do
+      add(:title, :string)
+      add(:director, :string)
+      add(:year, :integer)
+      timestamps()
+    end
+  end
+end
+```
+
+```shell
+mix ecto.gen.migration create_reviewers -r EctoExample.MovieReviews.Repo
+```
+
+```elixir
+defmodule EctoExample.MovieReviews.Repo.Migrations.CreateReviewers do
+  use Ecto.Migration
+
+  def change do
+    create table("reviewers") do
+      add(:name, :string)
+      timestamps()
+    end
+  end
+end
+```
+
+```shell
+mix ecto.gen.migration create_ratings -r EctoExample.MovieReviews.Repo
+```
+
+```elixir
+defmodule EctoExample.MovieReviews.Repo.Migrations.CreateRatings do
+  use Ecto.Migration
+
+  def change do
+    create table("ratings") do
+      add(:stars, :integer)
+      timestamps()
+    end
+  end
+end
+```
+
+### Mapeando relacionamentos nas tabelas
+
+#### 1:1
+
+![hospital](https://user-images.githubusercontent.com/16248004/141204042-584660d3-2e85-4176-b3e3-03852eac775d.png)
+
+```shell
+mix ecto.gen.migration add_patient_id_to_rooms -r EctoExample.Hospital.Repo
+```
+
+```elixir
+defmodule EctoExample.Hospital.Repo.Migrations.AddPatientIdToRooms do
+  use Ecto.Migration
+
+  def change do
+    alter table("rooms") do
+      add(:patient_id, references("patients"))
+    end
+  end
+end
+```
+
+#### 1:n
+
+![driver_licenses](https://user-images.githubusercontent.com/16248004/142182711-ff2222cb-ed16-48c6-83df-37da73346c7a.png)
+
+```shell
+mix ecto.gen.migration add_driver_id_to_licenses -r EctoExample.DriverLicenses.Repo
+```
+
+```elixir
+defmodule EctoExample.DriverLicenses.Repo.Migrations.AddDriverIdToLicenses do
+  use Ecto.Migration
+
+  def change do
+    alter table("licenses") do
+      add(:driver_id, references("drivers"))
+    end
+  end
+end
+```
+
+#### n:n
+
+![movie-reviews](https://user-images.githubusercontent.com/16248004/142079315-d761efd0-0c32-4b67-9546-86f077b9a0ac.png)
+
+```shell
+mix ecto.gen.migration add_relationships_to_rating -r EctoExample.MovieReviews.Repo
+```
+
+```elixir
+defmodule EctoExample.MovieReviews.Repo.Migrations.AddRelationshipsToRatings do
+  use Ecto.Migration
+
+  def change do
+    alter table("ratings") do
+      add(:movie_id, references("movies"))
+      add(:reviewer_id, references("reviewers"))
+    end
+  end
+end
+```
+
+### Executar migrations para criar relacionamento entre tabelas
+
+```shell
+mix ecto.migrate -r EctoExample.MovieReviews.Repo
+```
+
+```elixir
+EctoExample.MovieReviews.Repo.query!("select * from schema_migrations")
+```
+
+```shell
+mix ecto.migrations -r EctoExample.MovieReviews.Repo
+```
+
+### Revertendo versões do banco de dados
+
+```shell
+mix ecto.rollback -r EctoExample.MovieReviews.Repo
+```
+
+```elixir
+EctoExample.MovieReviews.Repo.query!("select * from schema_migrations")
+```
+
+```shell
+mix ecto.migrations -r EctoExample.MovieReviews.Repo
+```
+
+## Referências
+
+* Database migration: Concepts and principles (Part 1) - [https://cloud.google.com/architecture/database-migration-concepts-principles-part-1](https://cloud.google.com/architecture/database-migration-concepts-principles-part-1)
+* Ecto.Migration - [https://hexdocs.pm/ecto_sql/Ecto.Migration.html](https://hexdocs.pm/ecto_sql/Ecto.Migration.html)
+* Change - [https://hexdocs.pm/ecto_sql/Ecto.Migration.html#module-change](https://hexdocs.pm/ecto_sql/Ecto.Migration.html#module-change)
+* Associations - [https://hexdocs.pm/ecto/Ecto.html#module-associations](https://hexdocs.pm/ecto/Ecto.html#module-associations)
+* belongs_to/3 - [https://hexdocs.pm/ecto/Ecto.Schema.html#belongs_to/3](https://hexdocs.pm/ecto/Ecto.Schema.html#belongs_to/3)
+* has_many/3 - [https://hexdocs.pm/ecto/Ecto.Schema.html#has_many/3](https://hexdocs.pm/ecto/Ecto.Schema.html#has_many/3)
+* has_one/3 - [https://hexdocs.pm/ecto/Ecto.Schema.html#has_one/3](https://hexdocs.pm/ecto/Ecto.Schema.html#has_one/3)

@@ -1,0 +1,470 @@
+# Manipulando registros
+
+## Manipulando registros
+
+### Definindo changesets
+
+Módulo que permite filtrar, desserializar e validar dados externos para um struct do Elixir.
+
+#### Criando nossos primeiros changesets
+
+```elixir
+defmodule EctoExample.University.Schemas.College do
+  use Ecto.Schema
+
+  import Ecto.Changeset
+
+  alias EctoExample.University.Schemas.Enrollment
+
+  schema "colleges" do
+    field(:college_name, :string)
+    field(:state, :string)
+    field(:price, :decimal)
+
+    has_many(:enrollments, Enrollment)
+
+    timestamps()
+  end
+
+  def changeset(college, params) do
+    college
+    |> cast(params, [:college_name, :state, :price])
+    |> validate_required([:college_name, :state, :price])
+    |> validate_number(:price, greater_than_or_equal_to: 0)
+  end
+end
+```
+
+```elixir
+defmodule EctoExample.University.Schemas.Student do
+  use Ecto.Schema
+
+  import Ecto.Changeset
+
+  alias EctoExample.University.Schemas.Enrollment
+
+  schema "students" do
+    field(:student_name, :string)
+    field(:grade, :decimal)
+    field(:high_school_size, :integer)
+    has_many(:enrollments, Enrollment)
+
+    timestamps()
+  end
+
+  def changeset(student, params) do
+    student
+    |> cast(params, [:student_name, :grade, :high_school_size])
+    |> validate_required([:student_name, :grade, :high_school_size])
+    |> validate_number(:high_school_size, greater_than: 0)
+  end
+end
+```
+
+```elixir
+defmodule EctoExample.University.Schemas.Enrollment do
+  use Ecto.Schema
+
+  import Ecto.Changeset
+
+  alias EctoExample.University.Schemas.College
+  alias EctoExample.University.Schemas.Student
+
+  schema "enrollments" do
+    field(:course, :string)
+    field(:accepted, :boolean)
+    field(:applied_at, :naive_datetime_usec)
+    field(:accepted_at, :naive_datetime_usec)
+    field(:rejected_at, :naive_datetime_usec)
+
+    belongs_to(:college, College)
+    belongs_to(:student, Student)
+
+    timestamps()
+  end
+
+  def creation_changeset(enrollment, params) do
+    enrollment
+    |> cast(params, [:id, :course, :applied_at, :college_id, :student_id])
+    |> validate_required([:course, :applied_at, :college_id, :student_id])
+    |> foreign_key_constraint(:college_id)
+    |> foreign_key_constraint(:student_id)
+  end
+
+  def acceptance_changeset(enrollment, params) do
+    enrollment
+    |> cast(params, [:accepted, :accepted_at])
+    |> validate_required([:accepted, :accepted_at])
+  end
+
+  def rejection_changeset(enrollment, params) do
+    enrollment
+    |> cast(params, [:accepted, :rejected_at])
+    |> validate_required([:accepted, :rejected_at])
+  end
+end
+```
+
+### Inserindo registros
+
+```elixir
+alias EctoExample.University.Repo
+alias EctoExample.University.Schemas.Student
+
+%Student{} |> Student.changeset(%{}) |> Repo.insert()
+```
+
+```elixir
+alias EctoExample.University.Repo
+alias EctoExample.University.Schemas.Student
+
+%Student{} |> Student.changeset(%{}) |> Repo.insert!()
+```
+
+```elixir
+alias EctoExample.University.Repo
+alias EctoExample.University.Schemas.Student
+
+%Student{}
+|> Student.changeset(%{student_name: "Amy", grade: 3.9, high_school_size: 1000})
+|> Repo.insert()
+```
+
+```elixir
+alias EctoExample.University.Repo
+alias EctoExample.University.Schemas.College
+
+%College{} |> College.changeset(%{}) |> Repo.insert()
+```
+
+```elixir
+alias EctoExample.University.Repo
+alias EctoExample.University.Schemas.College
+
+%College{}
+|> College.changeset(%{"college_name" => "Stanford", "state" => "CA", "price" => 15000.00})
+|> Repo.insert()
+```
+
+```elixir
+alias EctoExample.University.Repo
+alias EctoExample.University.Schemas.Student
+alias EctoExample.University.Schemas.College
+alias EctoExample.University.Schemas.Enrollment
+
+{:ok, student} =
+  %Student{}
+  |> Student.changeset(%{student_name: "Amy", grade: 3.9, high_school_size: 1000})
+  |> Repo.insert()
+
+{:ok, college} =
+  %College{}
+  |> College.changeset(%{college_name: "Stanford", state: "CA", price: 15000.00})
+  |> Repo.insert()
+
+%Enrollment{}
+|> Enrollment.creation_changeset(%{
+  course: "CS",
+  student_id: 0,
+  college_id: 0,
+  applied_at: NaiveDateTime.utc_now()
+})
+|> Repo.insert()
+```
+
+```elixir
+alias EctoExample.University.Repo
+alias EctoExample.University.Schemas.Student
+alias EctoExample.University.Schemas.College
+alias EctoExample.University.Schemas.Enrollment
+
+{:ok, student} =
+  %Student{}
+  |> Student.changeset(%{student_name: "Amy", grade: 3.9, high_school_size: 1000})
+  |> Repo.insert()
+
+{:ok, college} =
+  %College{}
+  |> College.changeset(%{college_name: "Stanford", state: "CA", price: 15000.00})
+  |> Repo.insert()
+
+%Enrollment{}
+|> Enrollment.creation_changeset(%{
+  course: "CS",
+  student_id: student.id,
+  college_id: college.id,
+  applied_at: NaiveDateTime.utc_now()
+})
+|> Repo.insert()
+```
+
+### Atualizando registros
+
+```elixir
+alias EctoExample.University.Repo
+alias EctoExample.University.Schemas.Student
+alias EctoExample.University.Schemas.College
+alias EctoExample.University.Schemas.Enrollment
+
+{:ok, student} =
+  %Student{}
+  |> Student.changeset(%{student_name: "Amy", grade: 3.9, high_school_size: 1000})
+  |> Repo.insert()
+
+{:ok, college} =
+  %College{}
+  |> College.changeset(%{college_name: "Stanford", state: "CA", price: 15000.00})
+  |> Repo.insert()
+
+{:ok, application} =
+  %Enrollment{}
+  |> Enrollment.creation_changeset(%{
+    course: "CS",
+    student_id: student.id,
+    college_id: college.id,
+    applied_at: NaiveDateTime.utc_now()
+  })
+  |> Repo.insert()
+
+Enrollment.acceptance_changeset(application, %{
+  accepted: true,
+  accepted_at: NaiveDateTime.utc_now()
+})
+|> Repo.update()
+
+Enrollment.rejection_changeset(application, %{
+  accepted: false,
+  rejected_at: NaiveDateTime.utc_now()
+})
+|> Repo.update()
+```
+
+### Deletando registros
+
+```elixir
+alias EctoExample.University.Repo
+alias EctoExample.University.Schemas.Student
+
+{:ok, student} =
+  %Student{}
+  |> Student.changeset(%{student_name: "Amy", grade: 3.9, high_school_size: 1000})
+  |> Repo.insert()
+
+Repo.delete(student)
+```
+
+### Manipulando registros em lotes
+
+#### Inserindo registros
+
+```elixir
+alias EctoExample.University.Repo
+alias EctoExample.University.Schemas.Student
+
+now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+
+students = [
+  %{
+    id: 10,
+    student_name: "John",
+    grade: 3.9,
+    high_school_size: 1000,
+    inserted_at: now,
+    updated_at: now
+  },
+  %{
+    id: 11,
+    student_name: "Joey",
+    grade: 5,
+    high_school_size: 100,
+    inserted_at: now,
+    updated_at: now
+  }
+]
+
+Repo.insert_all(Student, students,
+  on_conflict: :nothing,
+  conflict_target: [:id]
+)
+```
+
+```elixir
+alias EctoExample.University.Repo
+alias EctoExample.University.Schemas.Student
+
+now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+
+students = [
+  %{
+    id: 10,
+    student_name: "John",
+    grade: 3.9,
+    high_school_size: 1000,
+    inserted_at: now,
+    updated_at: now
+  },
+  %{
+    id: 11,
+    student_name: "Joey",
+    grade: 5,
+    high_school_size: 100,
+    inserted_at: now,
+    updated_at: now
+  }
+]
+
+Repo.insert_all(Student, students, on_conflict: :nothing, conflict_target: [:id])
+```
+
+#### Atualizando registros
+
+```elixir
+alias EctoExample.University.Repo
+alias EctoExample.University.Schemas.Student
+
+Repo.update_all(Student, set: [high_school_size: 1000])
+```
+
+#### Deletando registros
+
+```elixir
+defmodule EctoExample.University.Schemas.Student do
+  use Ecto.Schema
+
+  import Ecto.Changeset
+
+  alias EctoExample.University.Schemas.Enrollment
+
+  schema "students" do
+    field(:student_name, :string)
+    field(:grade, :decimal)
+    field(:high_school_size, :integer)
+    has_many(:enrollments, Enrollment, on_delete: :delete_all)
+
+    timestamps()
+  end
+
+  def changeset(student, params) do
+    student
+    |> cast(params, [:student_name, :grade, :high_school_size])
+    |> validate_required([:student_name, :grade, :high_school_size])
+    |> validate_number(:high_school_size, greater_than: 0)
+  end
+end
+```
+
+```elixir
+defmodule EctoExample.University.Schemas.College do
+  use Ecto.Schema
+
+  import Ecto.Changeset
+
+  alias EctoExample.University.Schemas.Enrollment
+
+  schema "colleges" do
+    field(:college_name, :string)
+    field(:state, :string)
+    field(:price, :decimal)
+
+    has_many(:enrollments, Enrollment, on_delete: :delete_all)
+
+    timestamps()
+  end
+
+  def changeset(college, params) do
+    college
+    |> cast(params, [:college_name, :state, :price])
+    |> validate_required([:college_name, :state, :price])
+    |> validate_number(:price, greater_than_or_equal_to: 0)
+  end
+end
+```
+
+```elixir
+alias EctoExample.University.Repo
+alias EctoExample.University.Schemas.Student
+alias EctoExample.University.Schemas.Enrollment
+
+Repo.delete_all(Enrollment)
+Repo.delete_all(Student)
+```
+
+### Multi
+
+```elixir
+alias EctoExample.University.Repo
+alias EctoExample.University.Schemas.Student
+
+{:ok, college} =
+  %College{}
+  |> College.changeset(%{college_name: "Stanford", state: "CA", price: 15000.00})
+  |> Repo.insert()
+
+Repo.transaction(fn ->
+  case %Student{}
+       |> Student.changeset(%{student_name: "Amy", grade: "6.0", high_school_size: 1000})
+       |> Repo.insert() do
+    {:ok, student} ->
+      if Decimal.cmp(student.grade, 5) == :lt do
+        Repo.rollback({:validate_student_grade, {student, :invalid_student_grade}})
+      else
+        %Enrollment{}
+        |> Enrollment.creation_changeset(%{
+          course: "CS",
+          student_id: student.id,
+          college_id: college.id,
+          applied_at: NaiveDateTime.utc_now()
+        })
+        |> Repo.insert()
+      end
+  end
+end)
+```
+
+```elixir
+alias EctoExample.University.Repo
+alias EctoExample.University.Schemas.Student
+
+{:ok, college} =
+  %College{}
+  |> College.changeset(%{college_name: "Stanford", state: "CA", price: 15000.00})
+  |> Repo.insert()
+
+multi =
+  Ecto.Multi.new()
+  |> Ecto.Multi.run(:create_student, fn _, _ ->
+    %Student{}
+    |> Student.changeset(%{student_name: "Amy", grade: "6.0", high_school_size: 1000})
+    |> Repo.insert()
+  end)
+  |> Ecto.Multi.run(:validate_student_grade, fn _repo, %{create_student: student} ->
+    if Decimal.cmp(student.grade, 5) == :lt do
+      {:error, :invalid_student_grade}
+    else
+      {:ok, :valid_student_grade}
+    end
+  end)
+  |> Ecto.Multi.run(:create_application, fn _repo, %{create_student: student} ->
+    %Enrollment{}
+    |> Enrollment.creation_changeset(%{
+      course: "CS",
+      student_id: student.id,
+      college_id: college.id,
+      applied_at: NaiveDateTime.utc_now()
+    })
+    |> Repo.insert()
+  end)
+
+Repo.transaction(multi)
+```
+
+## Referências:
+
+* Changesets - [https://hexdocs.pm/ecto/Ecto.html#module-changesets](https://hexdocs.pm/ecto/Ecto.html#module-changesets)
+* Ecto.Changeset.html - [https://hexdocs.pm/ecto/Ecto.Changeset.html](https://hexdocs.pm/ecto/Ecto.Changeset.html)
+* insert/2 - [https://hexdocs.pm/ecto/Ecto.Repo.html#c:insert/2](https://hexdocs.pm/ecto/Ecto.Repo.html#c:insert/2)
+* update/2 - [https://hexdocs.pm/ecto/Ecto.Repo.html#c:update/2](https://hexdocs.pm/ecto/Ecto.Repo.html#c:update/2)
+* delete/2 - [https://hexdocs.pm/ecto/Ecto.Repo.html#c:delete/2](https://hexdocs.pm/ecto/Ecto.Repo.html#c:delete/2)
+* update_all/3 - [https://hexdocs.pm/ecto/Ecto.Repo.html#c:update_all/3](https://hexdocs.pm/ecto/Ecto.Repo.html#c:update_all/3)
+* delete_all/3 - [https://hexdocs.pm/ecto/Ecto.Repo.html#c:delete_all/3](https://hexdocs.pm/ecto/Ecto.Repo.html#c:delete_all/3)
+* Multi - [https://hexdocs.pm/ecto/composable-transactions-with-multi.html](https://hexdocs.pm/ecto/composable-transactions-with-multi.html)

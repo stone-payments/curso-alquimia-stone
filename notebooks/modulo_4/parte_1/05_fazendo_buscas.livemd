@@ -1,0 +1,655 @@
+# Módulo V - Capítulo 5 - Fazendo Buscas
+
+## Relembrando nosso modelo
+
+No capítulo anterior nós inserimos alguns dados em nossas tabelas e aprendemos 
+como manipular informações salvas em um banco de dados.
+
+Vamos relembrar como é nosso modelo:
+
+![entity-relation-model](images/entity-relation-model.png)
+
+Durante esse capítulo começaremos a fazer buscas pelas informações que cadastramos no capítulo anterior.
+
+## Preparando o ambiente
+
+Como finalizamos nossa conexão no capítulo anterior precisamos repetir os passos aqui.
+
+```elixir
+Mix.install([{:postgrex, "~> 0.15"}])
+```
+
+```elixir
+opts = [
+  hostname: "postgres",
+  username: "postgres",
+  password: "postgres",
+  database: "postgres",
+  port: 5432
+]
+
+{:ok, pid} = Postgrex.start_link(opts)
+```
+
+## Inserindo alguns dados para busca
+
+Como ainda não temos uma base grande o suficiente vamos inserir alguns dados para que possamos 
+fazer buscas.
+
+```elixir
+Postgrex.query(
+  pid,
+  """
+  INSERT INTO movie (title, year, director) VALUES 
+     ('Gone with the Wind', 1939, 'Victor Fleming'),
+     ('Star Wars 2', 1980, 'George Lucas'),
+     ('The Sound of Music', 1965, 'Robert Wise'),
+     ('E.T.', 1982, 'Steven Spielberg'),
+     ('Titanic', 1997, 'James Cameron'),
+     ('Snow White', 1937, null),
+     ('Avatar', 2009, 'James Cameron'),
+     ('Raiders of the Lost Ark', 1981, 'Steven Spielberg');
+  """,
+  []
+)
+```
+
+```elixir
+Postgrex.query(
+  pid,
+  """
+  INSERT INTO reviewer (name) VALUES
+    ('Sarah Martinez'),
+    ('Daniel Lewis'),
+    ('Brittany Harris'),
+    ('Mike Anderson'),
+    ('Chris Jackson'),
+    ('Elizabeth Thomas'),
+    ('James Cameron'),
+    ('Ashley White');
+  """,
+  []
+)
+```
+
+```elixir
+Postgrex.query(
+  pid,
+  """
+  INSERT INTO rating (movie_id, reviewer_id, stars, inserted_at) VALUES
+    (1, 2, 4, '2011-01-27'),
+    (2, 4, 4, null),
+    (3, 5, 2, '2011-01-20'),
+    (4, 6, 4, '2011-01-12'),
+    (4, 7, 2, '2011-01-30'),
+    (1, 3, 3, '2011-01-09'),
+    (3, 6, 3, '2011-01-27'),
+    (5, 7, 2, '2011-01-22'),
+    (4, 8, 4, null),
+    (6, 8, 3, '2011-01-15'),
+    (2, 5, 5, '2011-01-19'),
+    (6, 1, 5, '2011-01-20'),
+    (5, 8, 3, '2011-01-02');
+  """,
+  []
+)
+```
+
+## Buscando dados (SELECT)
+
+Agora que nós cadastramos nossos dadados podemos executar algumas consultas.
+
+Para isso vamos utilizar comandos **DQL**.
+
+<!-- livebook:{"break_markdown":true} -->
+
+### Buscando todos os dados dos filmes cadastrados
+
+```elixir
+Postgrex.query!(
+  pid,
+  "SELECT title FROM movie",
+  []
+)
+```
+
+### Buscando todos os dados dos avaliadores cadastrados
+
+```elixir
+Postgrex.query!(
+  pid,
+  "SELECT * FROM reviewer",
+  []
+)
+```
+
+### Buscando todos os dados das avaliações cadastrados
+
+```elixir
+Postgrex.query!(
+  pid,
+  "SELECT * FROM rating",
+  []
+)
+```
+
+## Filtrando dados (SELECT WHERE)
+
+Agora que sabemos como buscar, que tal melhorarmos essas buscas ?
+
+<!-- livebook:{"break_markdown":true} -->
+
+### Buscando os filmes que receberam lançados a partir de 1980
+
+```elixir
+Postgrex.query!(
+  pid,
+  "SELECT title FROM movie WHERE year > 1980",
+  []
+)
+```
+
+### Buscando os alunos que lançaram em 1972
+
+```elixir
+Postgrex.query!(
+  pid,
+  "SELECT title FROM movie WHERE year = 1977",
+  []
+)
+```
+
+## Buscas encadeadas
+
+Agora que sabemos um pouco sobre como criar condiçoes em buscas que tal começarmos a buscar dados
+e multiplas tabelas de uma vez.
+
+<!-- livebook:{"break_markdown":true} -->
+
+### Buscando filmes que tiveram alguma avaliação de 5 estrelas
+
+```elixir
+Postgrex.query!(
+  pid,
+  """
+  SELECT title FROM movie WHERE id in (
+    SELECT movie_id FROM rating WHERE stars = 5
+  )
+  """,
+  []
+)
+```
+
+### Buscando pessoas que avaliaram o Titanic
+
+```elixir
+Postgrex.query!(
+  pid,
+  """
+  SELECT name FROM reviewer WHERE id in (
+    SELECT reviewer_id FROM rating where movie_id in (
+      SELECT id FROM movie WHERE title = 'Titanic'
+    )
+  )
+  """,
+  []
+)
+```
+
+Conseguimos aninhar buscas com certa facilidade, no entanto dessa forma não é tão simples
+carregar dados de multiplas tabelas ao mesmo tempo. Para isso vamos utilizar o comando de 
+**JOIN**.
+
+## Juntando os dados (JOIN)
+
+Para entendermos como um joins funcionam vamos pensar um pouco em teoria de conjuntos.
+
+![sql-join](https://user-images.githubusercontent.com/16248004/141378539-31124ce7-9fcc-4ee7-ae0a-576a6ddcee3a.png)
+
+Digamos que a tabela A corresponde a nossa tabela de filmes e a tabela B a nossa tabela de avaliações.
+
+<!-- livebook:{"break_markdown":true} -->
+
+### INNER JOIN
+
+O **Inner join** é o método de junção mais conhecido. Com ele é possível se retorna 
+os registros que são comuns a ambas as tabelas.
+
+![inner-join](https://user-images.githubusercontent.com/16248004/142259598-70ce2da6-498f-4efe-8b07-4a1c6f57cc7e.jpg)
+
+Imagine que queremos buscar os filmes e as estrelas de que cada um recebeu, como no exemplo de 
+buscas encadeadas, mas dessa vez queremos todas as avaliações e o respectivo número de estrelas.
+
+```elixir
+Postgrex.query!(
+  pid,
+  """
+  SELECT m.title, r.stars, r.inserted_at FROM movie m
+    INNER JOIN rating r 
+      on r.movie_id = m.id
+  """,
+  []
+)
+```
+
+Agora imagine que também queiramos saber quem fez a avaliação. 
+Podemos juntar mais uma tabela ao nosso conjunto fazendo um novo join.
+
+```elixir
+Postgrex.query!(
+  pid,
+  """
+  SELECT re.name, m.title, ra.stars, ra.inserted_at FROM movie m
+    INNER JOIN rating ra on ra.movie_id = m.id
+    INNER JOIN reviewer re on ra.reviewer_id = re.id
+  """,
+  []
+)
+```
+
+Agora imagine que queremos apenas os filmes que tiveram uma avaliação de 5 estrelas.
+
+```elixir
+Postgrex.query!(
+  pid,
+  """
+  SELECT re.name, m.title, ra.stars, ra.inserted_at FROM movie m
+    INNER JOIN rating ra on ra.movie_id = m.id
+    INNER JOIN reviewer re on ra.reviewer_id = re.id
+  WHERE
+    ra.stars = 5 and m.title = 'Snow White'
+  """,
+  []
+)
+```
+
+### LEFT JOIN
+
+O **Left Join** busca todos os registros que estão na tabela A e os 
+registros da tabela B que são comuns à tabela A.
+
+![left-join](https://user-images.githubusercontent.com/16248004/142259004-2297fb8c-a0d5-4a60-b571-b99b45652c19.png)
+
+Vamos refazer o exemplo anterior, no entanto repare que nesse caso teremos também os filmes 
+que não tiveram nenhuma avaliação.
+
+```elixir
+Postgrex.query!(
+  pid,
+  """
+  SELECT m.title, r.stars, r.inserted_at FROM movie m
+    LEFT JOIN rating r 
+      on r.movie_id = m.id
+  """,
+  []
+)
+```
+
+### LEFT EXCLUDING JOIN
+
+Este tipo de *join* funciona da mesma forma que o anterior, no entanto ele retorna como resultado todos os registros que estão na tabela A 
+e que não estejam na tabela B.
+
+![left-excluding-join](https://user-images.githubusercontent.com/16248004/142259000-bba2b65c-6a2c-4eae-a9c1-988aa66d2394.jpg)
+
+Se quisermos apenas os filmes que não tiveram nenhuma avaliação podemos também filtrar com este
+tipo de join da seguinte forma.
+
+```elixir
+Postgrex.query!(
+  pid,
+  """
+  SELECT m.title, r.stars, r.inserted_at FROM movie m
+    LEFT JOIN rating r on r.movie_id = m.id
+  WHERE
+    r.stars IS NULL
+  """,
+  []
+)
+```
+
+### RIGHT JOIN
+
+O **right join** segue o mesmo principio dos exemplos anteriores (**left join**), com a diferença de 
+que teremos como resultado todos os registros que estão na tabela B e os registros da 
+tabela A que são comuns à tabela B (muda a ordem).
+
+![rigth-join](https://user-images.githubusercontent.com/16248004/142258884-9dde3106-1027-4d58-a212-8f33cef984e6.jpg)
+
+Vamos refazer os exemplos utilizados anteriormente.
+
+```elixir
+Postgrex.query!(
+  pid,
+  """
+  SELECT m.title, r.stars, r.inserted_at FROM movie m
+    RIGHT JOIN rating r 
+      on r.movie_id = m.id
+  """,
+  []
+)
+```
+
+### RIGHT EXCLUDING JOIN
+
+Assim como no exemplo anterior, o **right excluding join** segue o mesmo princípio de buscar
+todos os registros que estão na tabela A e que não estejam na tabela B.
+
+![right-excluding-join](https://user-images.githubusercontent.com/16248004/142258882-c8c15b1c-1de3-4bdf-9820-ca1e2781ae6f.jpg)
+
+Por mais que o príncipio seja o mesmo, se utilizarmos a mesma query do nosso exemplo com **left join**
+o resultado será diferente.
+
+```elixir
+Postgrex.query!(
+  pid,
+  """
+  SELECT m.title, r.stars, r.inserted_at FROM movie m
+    RIGHT JOIN rating r on r.movie_id = m.id
+  WHERE
+    r.stars IS NULL
+  """,
+  []
+)
+```
+
+O resultado não encontrou nada pois todas as avaliações possuem ao menos um filme.
+
+Se nós invertermos a ordem das tabelas estaremos buscando por dados que estão na tabela B e 
+não estão contidos na tabela A. Isso alteraria consideravelmente o resultado e teriamos um 
+resultado identido ao nosso exemplo com **left join**.
+
+```elixir
+Postgrex.query!(
+  pid,
+  """
+  SELECT m.title, r.stars, r.inserted_at FROM rating r
+    RIGHT JOIN movie m on r.movie_id = m.id
+  WHERE
+    r.stars IS NULL
+  """,
+  []
+)
+```
+
+### FULL OUTER JOIN
+
+Neste tipo de join o objetivo é buscar todos os registros que estão em ambas as tabelas.
+
+![outer-join](https://user-images.githubusercontent.com/16248004/142258931-17a956c1-a929-462e-86c3-a9ea671572cc.jpg)
+
+```elixir
+Postgrex.query!(
+  pid,
+  """
+  SELECT m.title, r.stars, r.inserted_at FROM rating r
+    FULL OUTER JOIN movie m 
+      on r.movie_id = m.id
+  """,
+  []
+)
+```
+
+### FULL OUTER JOIN EXCLUDING JOIN
+
+<!-- livebook:{"break_markdown":true} -->
+
+Utilizando este tipo de busca teremos como resultado todos os registros 
+que estão na tabela B, mas que não estejam na tabela A, e todos os 
+registros que estão na tabela A, mas que não estejam na tabela B.
+
+![outer-excluding-join](https://user-images.githubusercontent.com/16248004/142258923-96749336-cb0a-43bd-a928-eee152291efb.jpg)
+
+```elixir
+Postgrex.query!(
+  pid,
+  """
+  SELECT m.title, r.stars, r.inserted_at FROM rating r
+    FULL OUTER JOIN movie m on r.movie_id = m.id
+  WHERE
+    r.stars IS NULL
+  """,
+  []
+)
+```
+
+## Agrupando dados (GROUP BY)
+
+Muitas vezes precisamos de dados agrupados ao invéz dos detalhes de cada registro.
+Uma das formas de se agrupar dados é atravez do uso de **group by**.
+
+Vamos utilizar novamente o nosso exemplo de **inner join** no entanto agora queremos saber
+quais filmes tiveram alguma avaliação e não queremos esses dados duplicados.
+
+```elixir
+Postgrex.query!(
+  pid,
+  """
+  SELECT m.title FROM movie m
+    INNER JOIN rating r on r.movie_id = m.id
+  GROUP BY m.title
+  """,
+  []
+)
+```
+
+Podemos agrupar dados de diversas colunas de uma vez.
+Agora vamos buscar agrupar os filmes e suas respectiva quantidade de estrelas.
+
+```elixir
+Postgrex.query!(
+  pid,
+  """
+  SELECT m.title, r.stars FROM rating r
+    FULL OUTER JOIN movie m on r.movie_id = m.id
+  GROUP BY m.title, r.stars
+  """,
+  []
+)
+```
+
+O filme `"E.T"` teve multiplas avaliações de 4 estrelas, no entanto suas avaliações
+foram agrupadas e apenas um registro foi retornado.
+
+## Ordenando dados (ORDER BY)
+
+As vezes nós precisamos que os dados sejam retornados em uma ordem específica e é ai
+que o **order by**. Vamos buscar os filmes ordenados pela quantidade de 
+estrelas (da menor quantidade para a maior).
+
+```elixir
+Postgrex.query!(
+  pid,
+  """
+  SELECT m.title, r.stars, r.inserted_at FROM movie m
+    LEFT JOIN rating r on r.movie_id = m.id
+  ORDER BY
+    r.stars
+  """,
+  []
+)
+```
+
+Se quisermos os resultados do maior para o menor podemos mudar a forma como a ordenação é feita
+da seguinte forma.
+
+```elixir
+Postgrex.query!(
+  pid,
+  """
+  SELECT m.title, r.stars, r.inserted_at FROM movie m
+    LEFT JOIN rating r on r.movie_id = m.id
+  ORDER BY
+    r.stars, r.inserted_at DESC
+  """,
+  []
+)
+```
+
+## Agregadores (SUM, AVG, COUNT, MIN, MAX, HAVING)
+
+As vezes precisamos dos dados agregados como a soma ou a média de estrelas que um filme recebeu,
+ou simplesmente da quantidade de avaliações. A forma como fazemos isso é atravéz do uso de
+agregadores.
+
+Agregadores geralmente são utilizados em conjunto com o **group by** para obter valores agregados
+e agrupados.
+
+<!-- livebook:{"break_markdown":true} -->
+
+### SUM
+
+O agregador de **sum** é utilizado. Este operador normalmente é utilizado
+em conjunto com o **group by**.
+
+Que tal buscarmos a quantidade de estrelas que cada filme recebeu.
+
+```elixir
+Postgrex.query!(
+  pid,
+  """
+  SELECT m.title, SUM(r.stars) FROM movie m
+    INNER JOIN rating r on r.movie_id = m.id
+  GROUP BY 
+    m.title
+  """,
+  []
+)
+```
+
+### AVG
+
+As vezes a quantidade total não é interessante, mas sim a média dos valores.
+
+Vamos buscar as médias de estrelas que cada filme recebeu.
+
+```elixir
+Postgrex.query!(
+  pid,
+  """
+  SELECT m.title, AVG(r.stars) FROM movie m
+    INNER JOIN rating r on r.movie_id = m.id
+  GROUP BY 
+    m.title
+  """,
+  []
+)
+```
+
+### COUNT
+
+Se o que nos importa é saber a quantidade de dados registrados podemos utilizar o operador **count**.
+
+Vamos buscar a quantidade de avaliações que cada filme recebeu.
+
+```elixir
+Postgrex.query!(
+  pid,
+  """
+  SELECT m.title, COUNT(r) FROM movie m
+    INNER JOIN rating r on r.movie_id = m.id
+  GROUP BY 
+    m.title
+  """,
+  []
+)
+```
+
+### MAX
+
+Se o que procuramos é apenas o maior valor podemos utilizar o operador **max**.
+
+Vamos buscar qual foi o maior numero de estrelas recebidos por cada filme.
+
+```elixir
+Postgrex.query!(
+  pid,
+  """
+  SELECT m.title, MAX(r.stars) FROM movie m
+    INNER JOIN rating r on r.movie_id = m.id
+  GROUP BY 
+    m.title
+  """,
+  []
+)
+```
+
+### MIN
+
+Caso o que precisemos não seja o maior, mas sim o menor valor, podemos utilizar o operador
+**min**.
+
+Vamos repetir o exemplo acima buscando a menor quantidade de estrelas recebedas por cada filme.
+
+```elixir
+Postgrex.query!(
+  pid,
+  """
+  SELECT m.title, MIN(r.stars) FROM movie m
+    INNER JOIN rating r on r.movie_id = m.id
+  GROUP BY 
+    m.title
+  """,
+  []
+)
+```
+
+### HAVING
+
+Apesar de a semântica desse agrupador ser muito similar ao **group by** o **having**
+tem um objetivo diferente. Não podemos filtrar dados de outros agregadores atravéz da
+clausula `where` pois os mesmos são gerados após a busca ser feita. Por conta disso utilizamos
+o **having** para filtrar dados de outros agrupadores.
+
+Que buscarmos todos os filmes que tiveram mais de uma avaliação.
+
+```elixir
+Postgrex.query!(
+  pid,
+  """
+  SELECT m.title, COUNT(r) FROM movie m
+    INNER JOIN rating r on r.movie_id = m.id
+  GROUP BY 
+    m.title
+  HAVING 
+    COUNT(r) > 1
+  """,
+  []
+)
+```
+
+## LIMIT
+
+Muitas vezes temos uma base de dados muito grande e não precisamos de tanta informação.
+A forma como conseguimos limitar a quantidade de resultados retornados é atravez do uso
+de **limit**.
+
+Vamos buscar apenas um resultado para começar.
+
+```elixir
+Postgrex.query!(
+  pid,
+  """
+  SELECT m.title from movie m LIMIT 3
+  """,
+  []
+)
+```
+
+Que tal montarmos um top 3 de filmes que mais receberam estrelas.
+
+```elixir
+Postgrex.query!(
+  pid,
+  """
+  SELECT m.title, SUM(r.stars) FROM movie m
+    INNER JOIN rating r on r.movie_id = m.id
+  GROUP BY 
+    m.title
+  ORDER BY
+    SUM(r.stars) DESC
+  LIMIT 3
+  """,
+  []
+)
+```

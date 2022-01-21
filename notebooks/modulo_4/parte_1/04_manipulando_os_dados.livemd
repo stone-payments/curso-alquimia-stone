@@ -1,0 +1,139 @@
+# Módulo V - Capítulo 4 - Manipulando os dados
+
+## O modelo até agora
+
+No capítulo anterior nós criamos nossas tabelas e aprendemos um pouco sobre como manipular a 
+estrutura de um banco de dados.
+
+Vamos relembrar como ficou o nosso modelo:
+
+![entity-relation-model](images/entity-relation-model.png)
+
+Durante esse capítulo começaremos a inserir e manipular dados nas tabelas que criamos anteriormente, 
+portanto caso não tenha o modelo criado recomendo que volte ao capítulo anterior e configure corretamente
+seu banco de dados e tabelas.
+
+## Preparando o ambiente
+
+Como finalizamos nossa conexão no capítulo anterior precisa-mos repetir os passos aqui.
+
+```elixir
+Mix.install([{:postgrex, "~> 0.15"}])
+```
+
+```elixir
+opts = [
+  hostname: "postgres",
+  username: "postgres",
+  password: "postgres",
+  database: "postgres",
+  port: 5432
+]
+
+{:ok, pid} = Postgrex.start_link(opts)
+```
+
+## Inserindo dados (INSERT INTO)
+
+Agora que temos as tabelas criadas precisamos inserir alguns dados para que possamos consultados e manipulá-los.
+A forma como isso é feito é atrávez de **DML**.
+
+<!-- livebook:{"break_markdown":true} -->
+
+### Inserindo filmes
+
+```elixir
+
+```
+
+### Inserindo avaliadores
+
+```elixir
+
+```
+
+### Inserindo avaliações
+
+```elixir
+
+```
+
+### Testando as constraints
+
+No capítulo anterior nós criamos algumas constraints para evitar dados duplicados e 
+avaliações com mais de 5 estrelas.
+
+Vamos tentar inserir alguns dados inválidos e ver oque acontece.
+
+<!-- livebook:{"break_markdown":true} -->
+
+### Inserindo uma avaliação duplicada
+
+```elixir
+
+```
+
+### Inserindo mais de 5 estrelas
+
+```elixir
+
+```
+
+## Atualizando um dado (UPDATE)
+
+Agora que temos alguns dados cadastrados podemos atualizar algumas informações de um determinado
+usuário.
+
+Para isso seguiremos utilizando comandos **DML**.
+
+<!-- livebook:{"break_markdown":true} -->
+
+### Atualizando os dados de um estudante
+
+```elixir
+Postgrex.query!(
+  pid,
+  "UPDATE movie set year = 1978",
+  []
+)
+```
+
+Está query tem um problema pois ela atualiza todos os registros de filmes com o ano de 1978.
+Para que possamos dizer exatamente que dado atualizar precisamos inserir algumas condições 
+em nosso comando de atualização.
+
+```elixir
+Postgrex.query!(
+  pid,
+  "UPDATE movie set title = 'Star Wars 2' WHERE title = 'Star Wars 3' and id = 2",
+  []
+)
+```
+
+## Removendo dados (DELETE FROM)
+
+Para que possamos exemplificar a remoção de um dado vamos inserir um novo filme.
+
+Para isso ainda utilizaremos comandos DML.
+
+<!-- livebook:{"break_markdown":true} -->
+
+### Inserindo um novo filme para que possamos remove-lo
+
+```elixir
+Postgrex.query(
+  pid,
+  "INSERT INTO movie (title, director, year) VALUES ('E.T', 'Steven Spielberg', 1982)",
+  []
+)
+```
+
+### Removendo o filme criado
+
+```elixir
+Postgrex.query(
+  pid,
+  "DELETE FROM movie WHERE title = 'E.T.'",
+  []
+)
+```

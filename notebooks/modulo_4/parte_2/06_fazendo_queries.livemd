@@ -1,0 +1,820 @@
+# Fazendo queries
+
+## Populando a base de dados
+
+Para o nosso exemplo vamos inserir os seguintes registros no banco de dados:
+
+```elixir
+alias EctoExample.MovieReviews.Repo
+alias EctoExample.MovieReviews.Schemas.Movie
+alias EctoExample.MovieReviews.Schemas.Reviewer
+alias EctoExample.MovieReviews.Schemas.Rating
+
+movies = [
+  %{
+    id: 1,
+    title: "Gone with the Wind",
+    year: 1939,
+    director: "Victor Fleming",
+    inserted_at: ~N[2011-01-01 00:00:00],
+    updated_at: ~N[2011-01-01 00:00:00]
+  },
+  %{
+    id: 2,
+    title: "Star Wars 2",
+    year: 1977,
+    director: "George Lucas",
+    inserted_at: ~N[2011-01-01 00:00:00],
+    updated_at: ~N[2011-01-01 00:00:00]
+  },
+  %{
+    id: 3,
+    title: "The Sound of Music",
+    year: 1965,
+    director: "Robert Wise",
+    inserted_at: ~N[2011-01-01 00:00:00],
+    updated_at: ~N[2011-01-01 00:00:00]
+  },
+  %{
+    id: 4,
+    title: "E.T.",
+    year: 1982,
+    director: "Steven Spielberg",
+    inserted_at: ~N[2011-01-01 00:00:00],
+    updated_at: ~N[2011-01-01 00:00:00]
+  },
+  %{
+    id: 5,
+    title: "Titanic",
+    year: 1997,
+    director: "James Cameron",
+    inserted_at: ~N[2011-01-01 00:00:00],
+    updated_at: ~N[2011-01-01 00:00:00]
+  },
+  %{
+    id: 6,
+    title: "Snow White",
+    year: 1937,
+    director: nil,
+    inserted_at: ~N[2011-01-01 00:00:00],
+    updated_at: ~N[2011-01-01 00:00:00]
+  },
+  %{
+    id: 7,
+    title: "Avatar",
+    year: 2009,
+    director: "James Cameron",
+    inserted_at: ~N[2011-01-01 00:00:00],
+    updated_at: ~N[2011-01-01 00:00:00]
+  },
+  %{
+    id: 8,
+    title: "Raiders of the Lost Ark",
+    year: 1981,
+    director: "Steven Spielberg",
+    inserted_at: ~N[2011-01-01 00:00:00],
+    updated_at: ~N[2011-01-01 00:00:00]
+  }
+]
+
+Repo.insert_all(Movie, movies)
+
+reviewers = [
+  %{
+    id: 1,
+    name: "Sarah Martinez",
+    inserted_at: ~N[2011-01-01 00:00:00],
+    updated_at: ~N[2011-01-01 00:00:00]
+  },
+  %{
+    id: 2,
+    name: "Daniel Lewis",
+    inserted_at: ~N[2011-01-01 00:00:00],
+    updated_at: ~N[2011-01-01 00:00:00]
+  },
+  %{
+    id: 3,
+    name: "Brittany Harris",
+    inserted_at: ~N[2011-01-01 00:00:00],
+    updated_at: ~N[2011-01-01 00:00:00]
+  },
+  %{
+    id: 4,
+    name: "Mike Anderson",
+    inserted_at: ~N[2011-01-01 00:00:00],
+    updated_at: ~N[2011-01-01 00:00:00]
+  },
+  %{
+    id: 5,
+    name: "Chris Jackson",
+    inserted_at: ~N[2011-01-01 00:00:00],
+    updated_at: ~N[2011-01-01 00:00:00]
+  },
+  %{
+    id: 6,
+    name: "Elizabeth Thomas",
+    inserted_at: ~N[2011-01-01 00:00:00],
+    updated_at: ~N[2011-01-01 00:00:00]
+  },
+  %{
+    id: 7,
+    name: "James Cameron",
+    inserted_at: ~N[2011-01-01 00:00:00],
+    updated_at: ~N[2011-01-01 00:00:00]
+  },
+  %{
+    id: 8,
+    name: "Ashley White",
+    inserted_at: ~N[2011-01-01 00:00:00],
+    updated_at: ~N[2011-01-01 00:00:00]
+  }
+]
+
+Repo.insert_all(Reviewer, reviewers)
+
+ratings = [
+  %{
+    movie_id: 1,
+    reviewer_id: 1,
+    stars: 2,
+    inserted_at: ~N[2011-01-22 00:00:00],
+    updated_at: ~N[2011-01-01 00:00:00]
+  },
+  %{
+    movie_id: 1,
+    reviewer_id: 2,
+    stars: 4,
+    inserted_at: ~N[2011-01-27 00:00:00],
+    updated_at: ~N[2011-01-01 00:00:00]
+  },
+  %{
+    movie_id: 2,
+    reviewer_id: 4,
+    stars: 4,
+    inserted_at: ~N[2011-01-22 00:00:00],
+    updated_at: ~N[2011-01-01 00:00:00]
+  },
+  %{
+    movie_id: 3,
+    reviewer_id: 5,
+    stars: 2,
+    inserted_at: ~N[2011-01-20 00:00:00],
+    updated_at: ~N[2011-01-01 00:00:00]
+  },
+  %{
+    movie_id: 4,
+    reviewer_id: 6,
+    stars: 4,
+    inserted_at: ~N[2011-01-12 00:00:00],
+    updated_at: ~N[2011-01-01 00:00:00]
+  },
+  %{
+    movie_id: 4,
+    reviewer_id: 7,
+    stars: 2,
+    inserted_at: ~N[2011-01-30 00:00:00],
+    updated_at: ~N[2011-01-01 00:00:00]
+  },
+  %{
+    movie_id: 1,
+    reviewer_id: 3,
+    stars: 3,
+    inserted_at: ~N[2011-01-09 00:00:00],
+    updated_at: ~N[2011-01-01 00:00:00]
+  },
+  %{
+    movie_id: 3,
+    reviewer_id: 6,
+    stars: 3,
+    inserted_at: ~N[2011-01-27 00:00:00],
+    updated_at: ~N[2011-01-01 00:00:00]
+  },
+  %{
+    movie_id: 5,
+    reviewer_id: 7,
+    stars: 2,
+    inserted_at: ~N[2011-01-22 00:00:00],
+    updated_at: ~N[2011-01-01 00:00:00]
+  },
+  %{
+    movie_id: 4,
+    reviewer_id: 8,
+    stars: 4,
+    inserted_at: ~N[2011-01-22 00:00:00],
+    updated_at: ~N[2011-01-01 00:00:00]
+  },
+  %{
+    movie_id: 6,
+    reviewer_id: 8,
+    stars: 3,
+    inserted_at: ~N[2011-01-15 00:00:00],
+    updated_at: ~N[2011-01-01 00:00:00]
+  },
+  %{
+    movie_id: 2,
+    reviewer_id: 5,
+    stars: 5,
+    inserted_at: ~N[2011-01-19 00:00:00],
+    updated_at: ~N[2011-01-01 00:00:00]
+  },
+  %{
+    movie_id: 6,
+    reviewer_id: 1,
+    stars: 5,
+    inserted_at: ~N[2011-01-20 00:00:00],
+    updated_at: ~N[2011-01-01 00:00:00]
+  },
+  %{
+    movie_id: 5,
+    reviewer_id: 8,
+    stars: 3,
+    inserted_at: ~N[2011-01-02 00:00:00],
+    updated_at: ~N[2011-01-01 00:00:00]
+  }
+]
+
+Repo.insert_all(Rating, ratings)
+```
+
+### Buscando um único filme por id
+
+```elixir
+alias EctoExample.MovieReviews.Repo
+alias EctoExample.MovieReviews.Schemas.Movie
+Repo.get(Movie, 1)
+```
+
+```elixir
+alias EctoExample.MovieReviews.Repo
+alias EctoExample.MovieReviews.Schemas.Movie
+Repo.get(Movie, 0)
+```
+
+### Buscando um único filme por nome
+
+```elixir
+alias EctoExample.MovieReviews.Repo
+alias EctoExample.MovieReviews.Schemas.Movie
+Repo.get_by(Movie, title: "Titanic")
+```
+
+```elixir
+alias EctoExample.MovieReviews.Repo
+alias EctoExample.MovieReviews.Schemas.Movie
+Repo.get_by(Movie, title: "Cinderela Baiana")
+```
+
+### Buscando todos os dados dos filmes cadastrados
+
+```elixir
+alias EctoExample.MovieReviews.Repo
+alias EctoExample.MovieReviews.Schemas.Movie
+
+Repo.all(Movie)
+```
+
+### Buscando todos os dados dos avaliadores cadastrados
+
+```elixir
+alias EctoExample.MovieReviews.Repo
+alias EctoExample.MovieReviews.Schemas.Reviewer
+
+Repo.all(Reviewer)
+```
+
+### Buscando todos os dados das avaliações cadastrados
+
+```elixir
+alias EctoExample.MovieReviews.Repo
+alias EctoExample.MovieReviews.Schemas.Rating
+
+Repo.all(Rating)
+```
+
+## Filtrando dados baseados em um critério
+
+### Buscando os filmes que receberam lançados a partir de 1980
+
+```elixir
+alias EctoExample.MovieReviews.Repo
+alias EctoExample.MovieReviews.Schemas.Movie
+import Ecto.Query
+
+query = from(m in Movie, where: m.year > 1980, select: [m.title])
+Repo.all(query)
+```
+
+```elixir
+alias EctoExample.MovieReviews.Repo
+alias EctoExample.MovieReviews.Schemas.Movie
+import Ecto.Query
+
+Movie
+|> where([m], m.year > 1980)
+|> select([m], [m.title])
+|> Repo.all()
+```
+
+### Buscando os filmes lançados em 1972
+
+```elixir
+alias EctoExample.MovieReviews.Repo
+alias EctoExample.MovieReviews.Schemas.Movie
+import Ecto.Query
+
+query = from(m in Movie, where: m.year == 1972)
+
+Repo.all(query)
+```
+
+### Carregando associações
+
+```elixir
+alias EctoExample.MovieReviews.Repo
+alias EctoExample.MovieReviews.Schemas.Movie
+import Ecto.Query
+
+movie = Repo.get_by(Movie, title: "Titanic")
+
+Repo.preload(movie, :ratings)
+```
+
+### Carregar todas as avaliações de todos os filmes
+
+```elixir
+alias EctoExample.MovieReviews.Repo
+alias EctoExample.MovieReviews.Schemas.Movie
+import Ecto.Query
+
+query =
+  from(r in Rating,
+    preload: [:movie]
+  )
+
+Repo.all(query)
+```
+
+## Juntando os dados (JOIN)
+
+### INNER JOIN
+
+#### Buscar os filmes e as estrelas de que cada um recebeu
+
+```elixir
+alias EctoExample.MovieReviews.Repo
+alias EctoExample.MovieReviews.Schemas.Movie
+import Ecto.Query
+
+query =
+  from(ra in Rating,
+    inner_join: m in Movie,
+    on: ra.movie_id == m.id,
+    select: [m.title, ra.stars, ra.inserted_at]
+  )
+
+Repo.all(query)
+```
+
+#### Buscar os filmes e as estrelas de que cada um recebeu, junto com os dados dos avaliadores
+
+```elixir
+alias EctoExample.MovieReviews.Repo
+alias EctoExample.MovieReviews.Schemas.Movie
+alias EctoExample.MovieReviews.Schemas.Reviewer
+import Ecto.Query
+
+query =
+  from(ra in Rating,
+    inner_join: m in Movie,
+    inner_join: re in Reviewer,
+    on: ra.movie_id == m.id,
+    on: ra.reviewer_id == re.id,
+    select: [re.name, m.title, ra.stars, ra.inserted_at]
+  )
+
+Repo.all(query)
+```
+
+#### Filmes que tiveram uma avaliação de 5 estrelas
+
+```elixir
+alias EctoExample.MovieReviews.Repo
+alias EctoExample.MovieReviews.Schemas.Movie
+alias EctoExample.MovieReviews.Schemas.Reviewer
+import Ecto.Query
+
+query =
+  from(ra in Rating,
+    inner_join: m in Movie,
+    inner_join: re in Reviewer,
+    on: ra.movie_id == m.id,
+    on: ra.reviewer_id == re.id,
+    where: ra.stars == 5 and m.title == "Snow White",
+    select: [re.name, m.title, ra.stars, ra.inserted_at]
+  )
+
+Repo.all(query)
+```
+
+### LEFT JOIN
+
+#### Filmes com ou sem avaliações
+
+```elixir
+alias EctoExample.MovieReviews.Repo
+alias EctoExample.MovieReviews.Schemas.Movie
+alias EctoExample.MovieReviews.Schemas.Reviewer
+import Ecto.Query
+
+query =
+  from(m in Movie,
+    left_join: ra in Rating,
+    left_join: re in Reviewer,
+    on: ra.movie_id == m.id,
+    where: ra.stars == 5 and m.title == "Snow White",
+    select: [m.title, ra.stars, ra.inserted_at]
+  )
+
+Repo.all(query)
+```
+
+### LEFT EXCLUDING JOIN
+
+#### Filmes que não tiveram nenhuma avaliação
+
+```elixir
+alias EctoExample.MovieReviews.Repo
+alias EctoExample.MovieReviews.Schemas.Movie
+import Ecto.Query
+
+query =
+  from(m in Movie,
+    left_join: ra in Rating,
+    on: ra.movie_id == m.id,
+    where: is_nil(ra.stars),
+    select: [m.title, ra.stars, ra.inserted_at]
+  )
+
+Repo.all(query)
+```
+
+### RIGHT JOIN
+
+#### Buscar os filmes com as avaliações cada um recebeu
+
+```elixir
+alias EctoExample.MovieReviews.Repo
+alias EctoExample.MovieReviews.Schemas.Movie
+import Ecto.Query
+
+query =
+  from(m in Movie,
+    right_join: ra in Rating,
+    on: ra.movie_id == m.id,
+    select: [m.title, ra.stars, ra.inserted_at]
+  )
+
+Repo.all(query)
+```
+
+### RIGHT EXCLUDING JOIN
+
+#### Buscar os filmes com as avaliações cada um recebeu
+
+```elixir
+alias EctoExample.MovieReviews.Repo
+alias EctoExample.MovieReviews.Schemas.Movie
+import Ecto.Query
+
+query =
+  from(ra in Rating,
+    right_join: m in Movie,
+    on: ra.movie_id == m.id,
+    where: not is_nil(ra.stars),
+    select: [m.title, ra.stars, ra.inserted_at]
+  )
+
+Repo.all(query)
+```
+
+## Agrupando dados (GROUP BY)
+
+### Filmes tiveram alguma avaliação sem duplicação
+
+```elixir
+alias EctoExample.MovieReviews.Repo
+alias EctoExample.MovieReviews.Schemas.Movie
+import Ecto.Query
+
+query =
+  from(m in Movie,
+    inner_join: ra in Rating,
+    on: ra.movie_id == m.id,
+    group_by: [m.title],
+    select: [m.title]
+  )
+
+Repo.all(query)
+```
+
+### Agrupar os filmes e suas respectiva quantidade de estrelas
+
+```elixir
+alias EctoExample.MovieReviews.Repo
+alias EctoExample.MovieReviews.Schemas.Movie
+import Ecto.Query
+
+query =
+  from(m in Movie,
+    inner_join: ra in Rating,
+    on: ra.movie_id == m.id,
+    group_by: [m.title, ra.stars],
+    select: [m.title, ra.stars]
+  )
+
+Repo.all(query)
+```
+
+## Ordenando dados (ORDER BY)
+
+### Filmes ordenados pela quantidade de estrelas em ordem crescente
+
+```elixir
+alias EctoExample.MovieReviews.Repo
+alias EctoExample.MovieReviews.Schemas.Movie
+import Ecto.Query
+
+query =
+  from(m in Movie,
+    inner_join: ra in Rating,
+    on: ra.movie_id == m.id,
+    order_by: [ra.stars],
+    select: [m.title, ra.stars, ra.inserted_at]
+  )
+
+Repo.all(query)
+```
+
+### Filmes ordenados pela quantidade de estrelas em ordem decrescente
+
+```elixir
+alias EctoExample.MovieReviews.Repo
+alias EctoExample.MovieReviews.Schemas.Movie
+import Ecto.Query
+
+query =
+  from(m in Movie,
+    inner_join: ra in Rating,
+    on: ra.movie_id == m.id,
+    order_by: [asc: ra.stars, desc: ra.inserted_at],
+    select: [m.title, ra.stars, ra.inserted_at]
+  )
+
+Repo.all(query)
+```
+
+## Agregadores (SUM, AVG, COUNT, MIN, MAX, HAVING)
+
+### SUM
+
+#### Quantidade de estrelas que cada filme recebeu
+
+```elixir
+alias EctoExample.MovieReviews.Repo
+alias EctoExample.MovieReviews.Schemas.Movie
+import Ecto.Query
+
+query =
+  from(m in Movie,
+    inner_join: ra in Rating,
+    on: ra.movie_id == m.id,
+    group_by: [m.title],
+    select: [m.title, sum(ra.stars)]
+  )
+
+Repo.all(query)
+```
+
+### AVG
+
+#### Médias de estrelas que cada filme recebeu
+
+```elixir
+alias EctoExample.MovieReviews.Repo
+alias EctoExample.MovieReviews.Schemas.Movie
+import Ecto.Query
+
+query =
+  from(m in Movie,
+    inner_join: ra in Rating,
+    on: ra.movie_id == m.id,
+    group_by: [m.title],
+    select: [m.title, avg(ra.stars)]
+  )
+
+Repo.all(query)
+```
+
+### COUNT
+
+#### Quantidade de avaliações que cada filme recebeu
+
+```elixir
+alias EctoExample.MovieReviews.Repo
+alias EctoExample.MovieReviews.Schemas.Movie
+import Ecto.Query
+
+query =
+  from(m in Movie,
+    left_join: ra in Rating,
+    on: ra.movie_id == m.id,
+    group_by: [m.title],
+    select: [m.title, count(ra.id)]
+  )
+
+Repo.all(query)
+```
+
+### MAX
+
+#### Maior numero de estrelas recebidos por cada filme
+
+```elixir
+alias EctoExample.MovieReviews.Repo
+alias EctoExample.MovieReviews.Schemas.Movie
+import Ecto.Query
+
+query =
+  from(m in Movie,
+    inner_join: ra in Rating,
+    on: ra.movie_id == m.id,
+    group_by: [m.title],
+    select: [m.title, max(ra.stars)]
+  )
+
+Repo.all(query)
+```
+
+### MIN
+
+#### Menor quantidade de estrelas recebidas por cada filme
+
+```elixir
+alias EctoExample.MovieReviews.Repo
+alias EctoExample.MovieReviews.Schemas.Movie
+import Ecto.Query
+
+query =
+  from(m in Movie,
+    inner_join: ra in Rating,
+    on: ra.movie_id == m.id,
+    group_by: [m.title],
+    select: [m.title, min(ra.stars)]
+  )
+
+Repo.all(query)
+```
+
+### HAVING
+
+#### Filmes que tiveram mais de uma avaliação
+
+```elixir
+alias EctoExample.MovieReviews.Repo
+alias EctoExample.MovieReviews.Schemas.Movie
+import Ecto.Query
+
+query =
+  from(m in Movie,
+    inner_join: ra in Rating,
+    on: ra.movie_id == m.id,
+    group_by: [m.title],
+    select: [m.title, count(ra.id)],
+    having: count(ra.id) > 1
+  )
+
+Repo.all(query)
+```
+
+## LIMIT
+
+#### Limitando a listagem de títulos de filme para 3 resultados
+
+```elixir
+alias EctoExample.MovieReviews.Repo
+alias EctoExample.MovieReviews.Schemas.Movie
+import Ecto.Query
+
+query =
+  from(m in Movie,
+    inner_join: ra in Rating,
+    on: ra.movie_id == m.id,
+    select: m.title,
+    limit: 3
+  )
+
+Repo.all(query)
+```
+
+#### Top 3 de filmes que mais receberam estrelas
+
+```elixir
+alias EctoExample.MovieReviews.Repo
+alias EctoExample.MovieReviews.Schemas.Movie
+import Ecto.Query
+
+query =
+  from(m in Movie,
+    inner_join: ra in Rating,
+    on: ra.movie_id == m.id,
+    group_by: [m.title],
+    select: [m.title, sum(ra.stars)],
+    limit: 3
+  )
+
+Repo.all(query)
+```
+
+### Fragment
+
+Forma de chamar funções em SQL puro no Ecto
+
+#### Listagem de títulos de filme em uppercase
+
+```elixir
+alias EctoExample.MovieReviews.Repo
+alias EctoExample.MovieReviews.Schemas.Movie
+import Ecto.Query
+
+query =
+  from(m in Movie,
+    select: fragment("upper(?)", m.title)
+  )
+
+Repo.all(query)
+```
+
+#### Filtrar títulos de filme em uppercase
+
+```elixir
+alias EctoExample.MovieReviews.Repo
+alias EctoExample.MovieReviews.Schemas.Movie
+import Ecto.Query
+
+title = "Gone with the Wind"
+
+query =
+  from(m in Movie,
+    where: m.title == ^title,
+    select: fragment("upper(?)", m.title)
+  )
+
+Repo.all(query)
+```
+
+### Like
+
+Forma de buscar por campo de texto
+
+#### Filtrar títulos de filme que começam em S
+
+```elixir
+alias EctoExample.MovieReviews.Repo
+alias EctoExample.MovieReviews.Schemas.Movie
+import Ecto.Query
+
+title = "S"
+
+query =
+  from(m in Movie,
+    where: like(m.title, ^"#{title}%"),
+    select: m.title
+  )
+
+Repo.all(query)
+```
+
+### Otimizando queries através de índices
+
+```shell
+mix ecto.gen.migration add_indexes_to_movies -r EctoExample.MovieReviews.Repo
+```
+
+```elixir
+defmodule EctoExample.MovieReviews.Repo.Migrations.AddIndexesToMovies do
+  use Ecto.Migration
+
+  def change do
+    create(index("movies", [:title]))
+  end
+end
+```
+
+## Referências:
+
+* Ecto.Query - [https://hexdocs.pm/ecto/Ecto.Query.html(https://hexdocs.pm/ecto/Ecto.Query.html)](https://hexdocs.pm/ecto/Ecto.Query.html(https://hexdocs.pm/ecto/Ecto.Query.html))
+* all/2 - [https://hexdocs.pm/ecto/Ecto.Repo.html#c:all/2](https://hexdocs.pm/ecto/Ecto.Repo.html#c:all/2)
+* one/2 - [https://hexdocs.pm/ecto/Ecto.Repo.html#c:one/2](https://hexdocs.pm/ecto/Ecto.Repo.html#c:one/2)
+* Filtering results - [https://hexdocs.pm/ecto/getting-started.html#our-first-queries](https://hexdocs.pm/ecto/getting-started.html#our-first-queries)
+* LIKE injection - [https://github.blog/2015-11-03-like-injection](https://github.blog/2015-11-03-like-injection])
+* index/3 - [https://hexdocs.pm/ecto_sql/Ecto.Migration.html#index/3](https://hexdocs.pm/ecto_sql/Ecto.Migration.html#index/3)

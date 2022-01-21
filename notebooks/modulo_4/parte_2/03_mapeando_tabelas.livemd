@@ -1,0 +1,171 @@
+# Untitled notebook
+
+## Mapeando tabelas
+
+### Criando schemas
+
+```elixir
+defmodule EctoExample.MovieReviews.Schemas.Movie do
+  use Ecto.Schema
+
+  schema "movies" do
+    field(:title, :string)
+    field(:director, :string)
+    field(:year, :integer)
+    timestamps()
+  end
+end
+```
+
+```elixir
+defmodule EctoExample.MovieReviews.Schemas.Reviewer do
+  use Ecto.Schema
+
+  schema "reviewers" do
+    field(:name, :string)
+    timestamps()
+  end
+end
+```
+
+```elixir
+defmodule EctoExample.MovieReviews.Schemas.Rating do
+  use Ecto.Schema
+
+  schema "ratings" do
+    field(:stars, :integer)
+    timestamps()
+  end
+end
+```
+
+### Criando tabelas
+
+* Tabelas são criadas no Ecto através de migrations com Ecto SQL
+
+### O que são migrations:
+
+* Um histórico de modificações no banco de dados de forma que seja fácil navegar entre alterações e aplicar alterações com facilidade e segurança
+* No Ecto, implementamos migrations através do módulo [Ecto.Migration](https://hexdocs.pm/ecto_sql/Ecto.Migration.html)
+
+### Anatomia de uma migration:
+
+Implementa 2 operações:
+
+* `up` - adiciona mudanças avançando o banco de dados
+* `down` - reverte mudanças implementadas no `up` para serem executadas em caso de erros
+
+```elixir
+defmodule MyRepo.Migrations.AddWeatherTable do
+  use Ecto.Migration
+
+  def up do
+    create table("weather") do
+      ...
+    end
+  end
+
+  def down do
+    drop(table("weather"))
+  end
+end
+```
+
+A maior parte das operações chamadas em `up` e `down` podem ser subtituídas implementando a função `change`:
+
+```elixir
+defmodule MyRepo.Migrations.AddWeatherTable do
+  use Ecto.Migration
+
+  def change do
+    create table("weather") do
+      ...
+    end
+  end
+end
+```
+
+O Ecto consegue gerar a operação `down` automaticamente para você.
+
+### Como é armazenado o estado do banco de dados
+
+O Ecto utiliza a tabela `schema_migrations` para armazenar todas as migrations que já foram executadas no ecto
+
+### Lidando com concorrência
+
+O Ecto trava alterações na tabela `schema_migrations` ao executar uma migration, impedindo que 2 servidores executem a mesma migration ao mesmo tempo.
+
+### Gerando nossas primeiras migrations
+
+![entity-relation-model](https://user-images.githubusercontent.com/16248004/142079315-d761efd0-0c32-4b67-9546-86f077b9a0ac.png)
+
+```shell
+mix ecto.gen.migration create_movies
+```
+
+```elixir
+defmodule EctoExample.MovieReviews.Repo.Migrations.CreateMovies do
+  def change do
+    create table("movies") do
+      add(:title, :string)
+      add(:director, :string)
+      add(:year, :integer)
+      timestamps()
+    end
+  end
+end
+```
+
+O Ecto armaneza nossas migrations no diretório `priv/migrations/ <nome-do-repo>`, no nosso caso em `priv/migrations/movie_reviews`
+
+```shell
+mix ecto.gen.migration create_reviewers
+```
+
+```elixir
+defmodule EctoExample.MovieReviews.Repo.Migrations.CreateReviewers do
+  use Ecto.Migration
+
+  def change do
+    create table("reviewers") do
+      add(:name, :string)
+      timestamps()
+    end
+  end
+end
+```
+
+```shell
+mix ecto.gen.migration create_ratings
+```
+
+```elixir
+defmodule EctoExample.MovieReviews.Repo.Migrations.CreateRatings do
+  use Ecto.Migration
+
+  def change do
+    create table("ratings") do
+      add(:stars, :integer)
+      timestamps()
+    end
+  end
+end
+```
+
+### Criando banco de dados
+
+```shell
+mix ecto.create
+```
+
+### Executar migrations para criar tabelas
+
+```shell
+mix ecto.migrate
+```
+
+## Referências
+
+* Database migration: Concepts and principles (Part 1) - [https://cloud.google.com/architecture/database-migration-concepts-principles-part-1](https://cloud.google.com/architecture/database-migration-concepts-principles-part-1)
+* Ecto.Migration - [https://hexdocs.pm/ecto_sql/Ecto.Migration.html](https://hexdocs.pm/ecto_sql/Ecto.Migration.html)
+* Change - [https://hexdocs.pm/ecto_sql/Ecto.Migration.html#module-change](https://hexdocs.pm/ecto_sql/Ecto.Migration.html#module-change)

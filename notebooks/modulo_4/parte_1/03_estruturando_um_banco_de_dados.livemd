@@ -1,0 +1,175 @@
+# Módulo V - Capítulo 3 - Estruturando um  banco de dados
+
+## Instalando o PostgreSQL
+
+Todos os exemplos utilizados nesse documento serão executados utilizando o PostgreSQL 
+como banco de dados, portanto caso deseje instalar o mesmo na sua maquina ou utilizar um 
+container com o mesmo siga os guias abaixo:
+
+### Via docker-compose
+
+Para instalar o `docker` e `docker-compose` siga os guias em:
+
+* [Instalando docker no Ubuntu](https://docs.docker.com/engine/install/ubuntu/);
+* [Instalando docker-compose](https://docs.docker.com/compose/install/);
+
+Caso já tenha instalado o docker e docker-compose crie um arquivo `docker-compose.yml` e insira
+o código abaixo:
+
+```
+version: "3"
+
+volumes:
+  postgres_volume:
+    driver: local
+
+services:
+  postgres:
+    image: postgres:13-alpine
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres_volume:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+```
+
+Após isso apenas execute `docker-compose up -d` para subir o container.
+
+## Instalando dependências
+
+Vamos utilizar uma lib chamada `postgrex` para executar queries e conectar no banco de dados.
+
+```elixir
+Mix.install([{:postgrex, "~> 0.15"}], force: true)
+```
+
+## Conectando ao banco de dados
+
+Com a dependência instalada agora precisamos inicializar o processo do `postgrex` 
+com as configurações necessárias para conectar ao banco de dados.
+
+```elixir
+opts = [
+  hostname: "postgres",
+  username: "postgres",
+  password: "postgres",
+  database: "postgres",
+  port: 5432
+]
+
+{:ok, pid} = Postgrex.start_link(opts)
+```
+
+## Criando as tabelas (CREATE TABLE)
+
+Antes de começarmos a criar as tabelas vamos relembrar como ficou nosso modelo de avaliadores e filmes.
+
+![entity-relation-model](images/entity-relation-model.png)
+
+Podemos começar criando as cada uma das tabelas com seus respectivos parametros.
+
+Para a criação das tabelas utilizaremos os seguintes comandos **DDL**.
+
+<!-- livebook:{"break_markdown":true} -->
+
+### Criando a tabela de filmes
+
+```elixir
+Postgrex.query(
+  pid,
+  "CREATE TABLE movie (id SERIAL NOT NULL, title varchar NOT NULL, director varchar DEFAULT 'Desconhecido', year integer NOT NULL, CONSTRAINT unique_movie_id UNIQUE (id))",
+  []
+)
+```
+
+### Criando a tabela de avaliadores
+
+```elixir
+Postgrex.query(
+  pid,
+  "CREATE TABLE reviewer (id SERIAL NOT NULL, name varchar NOT NULL, CONSTRAINT unique_reviewer_id UNIQUE (id))",
+  []
+)
+```
+
+### Criando a tabela de avaliações
+
+```elixir
+Postgrex.query(
+  pid,
+  "CREATE TABLE rating (movie_id integer, reviewer_id integer, inserted_at date, stars integer, CONSTRAINT unique_review_id UNIQUE (movie_id, reviewer_id))",
+  []
+)
+```
+
+## Alterando as tabelas (ALTER TABLE)
+
+Para criar a relação entre as tabelas de filmes e avaliadores com a tabela de avaliação 
+vamos precisar alterar nossas tabelas e criar uma chave estrangeira.
+
+Podemos também evitar que uma avaliação receba mais de 5 estrelas.
+
+Para isso ainda utilizaremos os seguintes comandos **DDL**.
+
+<!-- livebook:{"break_markdown":true} -->
+
+### Criando relacionamento entre avaliações e filmes
+
+```elixir
+Postgrex.query(
+  pid,
+  "ALTER TABLE rating ADD FOREIGN KEY (movie_id) REFERENCES movie(id)",
+  []
+)
+```
+
+### Criando relacionamento entre avaliações e avaliadores
+
+```elixir
+Postgrex.query(
+  pid,
+  "ALTER TABLE rating ADD FOREIGN KEY (reviewer_id) REFERENCES reviewer(id)",
+  []
+)
+```
+
+### Limitando o número de estrelas possíveis
+
+```elixir
+Postgrex.query(
+  pid,
+  "ALTER TABLE rating ADD CHECK (stars <= 5)",
+  []
+)
+```
+
+## Removendo uma tabela (DROP TABLE)
+
+Para que possamos exemplificar como é possível se apagar uma tabela vamos criar uma tabela 
+que não será utilizada em nosso modelo.
+
+Assim como anteriormente utilizaremos comandos **DDL**.
+
+<!-- livebook:{"break_markdown":true} -->
+
+### Criando uma tabela de séries
+
+```elixir
+Postgrex.query(
+  pid,
+  "CREATE TABLE series (id SERIAL, name varchar);",
+  []
+)
+```
+
+### Deletando a tabela que acabamos de criar
+
+```elixir
+Postgrex.query(
+  pid,
+  "DROP TABLE series;",
+  []
+)
+```

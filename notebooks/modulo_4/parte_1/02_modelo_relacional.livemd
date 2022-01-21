@@ -1,0 +1,160 @@
+# Módulo V - Capítulo 2 - Modelo Relacional
+
+## Introdução
+
+Em bancos de dados com modelo relacional, como os citados anteriormente [PostgreSQL](https://www.postgresql.org/) e [MySQL](https://www.mysql.com/), os dados são armazenados em tabelas relacionais.
+
+Para simplificar o entendimento podemos pensar nos dados em um modelo relacional como uma planilha de excel.
+
+* Linhas (Que possuem dados);
+* Colunas (Que possuem N linhas);
+* Planilhas (Que possuem N colunas);
+* Arquivo (Que agrupa várias planilhas);
+
+Imagine que você tem um arquivo `papelaria.xlsx` que possui uma planilha de estoque de uma papelaria.
+
+![planilha-excel](planilha-excel.png)
+
+Em um banco de dados relacional os dados são armazenados de maneira similar.
+
+* *rows* ou linhas (Que possue algum dado);
+* *columns* ou colunas (Que possum múltiplas *rows*);
+* *tables* ou tabelas (Que possue múltiplas *columns*);
+* *database* ou banco de dados (Que possue múltiplas *tables*);
+
+![inventory](images/inventory.png)
+
+A imagem acima é a mesma representação do arquivo `papelaria.xls` seguindo o [modelo entidade-relacionamento](https://pt.wikipedia.org/wiki/Modelo_entidade_relacionamento)
+de um banco de dados.
+
+## Tabelas e relacionamentos
+
+Em um banco de dados relacional os dados são armazenados em uma estrutura de 
+tabelas e relacionamentos como demonstrado na sessão anterior.
+
+Vamos pensar em um modelo um pouco diferente dessa vez. Imagine que tenhamos um sistema 
+que permite a pessoas avaliarem filmes que elas assistiram.
+
+Comecemos primeiro modelando que dados queremos armazenar de um filme, sendo eles:
+
+1. Título (`varchar`);
+2. Diretor (`varchar`);
+3. Ano de lançamento (`integer`);
+
+![movie](images/movie.png)
+
+Agora que sabemos o que precisamos para os filmes, avancemos para os avaliadores:
+
+1. Nome do avaliador (`varchar`);
+
+![reviewer](images/reviewer.png)
+
+Já sabemos o que precisamos armazenar de avaliadores e dos filmes, mas esses dados ainda não estão relacionados e 
+por conta disso não conseguiriamos aferir qual foi a avaliação dada a nenhum filme, então precisaremos também
+de um modelo capaz de representar a avaliação em si.
+
+Os dados que precisaremos para definir essa avaliação são:
+
+1. O filme que está sendo avaliado (`foreign key`);
+2. Quem está avaliando esse filme (`foreign key`);
+3. Quantas estrelas o avaliador deu para o filme (`integer`);
+4. Quando essa avaliação foi feita (`date`);
+
+![rating](images/rating.png)
+
+A partir desse momento passamos a ter uma relação direta entre as tabelas de filmes, avaliações e avaliadores.
+
+A relação dessas tabelas se da pela existència de [chaves estrangeiras](https://pt.wikipedia.org/wiki/Chave_estrangeira) na tabela de avaliações.
+
+As [Chaves estrangeiras](https://pt.wikipedia.org/wiki/Chave_estrangeira), assim como as [chaves primarias](https://pt.wikipedia.org/wiki/Chave_prim%C3%A1ria) são *constraints* utilizadas para referenciar
+uma tabela ou relação. Vamos explicar um pouco mais sobre *constraints* posteriormente.
+
+Nosso modelo ficou da seguinte forma:
+
+![entity-relation-model](images/entity-relation-model.png)
+
+Alguns de vocês devem estar se perguntando o motivo de criarmos uma nova tabela de 
+avaliações no exemplo anterior ao invéz de criar as chaves estrangeiras em avaliador ou filmes diretamente. 
+Para entender o racíocinio por trás dessa decisão precisamos entender o conceito de [cardinalidade](https://pt.wikipedia.org/wiki/Cardinalidade_(modelagem_de_dados)).
+
+## Cardinalidade
+
+Cardinalidade é um conceito utilizado para definir o grau de um relacionamento entre duas tabelas.
+
+De forma mais simples os "números" exibidos no diagrama anterior representam a cardinalidade, ou grau, 
+do relacionamento entre as tabelas.
+
+A cardinalidade pode assumir os seguintes valores:
+
+* **1:1** ou um-para-um (significa que um dado registro pode estar relacionado a apenas um registro da outra tabela);
+* **1:n** ou um-para-vários (significa que um dado registro pode estar relacionado a vários registros da outra tabela);
+* **n:n** ou vários-para-vários (significa que um dado registro pode estar relacionado a vários registros da outra tabela, e vice-versa);
+
+### Relacionamento 1:1
+
+Para exemplificar pensemos em um modelo para armazenar dados de pacientes internados em um hospital.
+Queremos apenas saber que pacientes estão em qual quarto e estes quartos são todos individuais.
+
+![pacient_room](images/pacient_room.png)
+
+Analisando o modelo acima podemos interpretar que um dado quarto comporta apenas um paciente e o
+mesmo paciente só pode ser internado em um determinado quarto por vez.
+
+### Relacionamento 1:n
+
+Neste exemplo vamos montar um modelo para armazenar dados de motoristas e seus dados dados de habilitação. 
+Neste primeiro exemplo podemos entender que um motorista pode ser habilitado a pilotar motocicletas (A), carros (B) e caminhões (C) apenas.
+
+![diver_licenses](images/diver_licenses.png)
+
+No modelo acima podemos afirmar que um motorista pode ter várias habilitações ao mesmo tempo, no entanto uma habilitação
+pertence apenas a um motorista.
+
+### Relacionamento n:n
+
+Em relacionamento de vários-para-vários existe uma diferença dos demais pois o mesmo sempre existirá
+em conjunto com uma terceira tabela. Isso ocorre pois em relacionamento n:n ambas as tabelas precisáriam
+possuir as chaves que indicam o relacionamento das mesmas o que impossibilita a crianção de registros em ambas
+já que não existe uma forma de ambos os dados existirem e serem inseridos ao mesmo tempo.
+
+Voltemos ao modelo construido inicialmente para os avaliadores e filmes.
+
+![entity-relation-model](images/entity-relation-model.png)
+
+Analisando novamente o modelo acima podemos entender que um avaliador pode ter várias avaliações, mas cada avaliação 
+só é feita para uma determinado filme. Enquanto isso um filme pode receber várias avaliações, mas cada 
+avaliação pertence apenas a um avaliador.
+
+## Contraints
+
+Para que um relacionamento ou atributo se mantenham concisos as vezes é necessário que se crie
+restrições para que um dado seja inserido ou modificado. Essas restrições nada mais são que [constraints](https://en.wikipedia.org/wiki/Relational_database#Constraints).
+
+*Contraints* tem multiplos usos, mas o mais comum é evitar que dados sejam duplicados em um banco de dados.
+
+Alguns exemplos de *constraints* são:
+
+* Chaves primárias (A *constraint* evita que dois registros tenham o mesmo identificador e não sejam nulos);
+* Chaves estrangeiras (A *constraint* evita que relações sejam duplicadas);
+
+As condições de uma constraint podem ser customizadas. Imagine que temos um serviço que apenas aceite
+cadastros de usuários com idade maior de 18 anos, um constraint é capaz de garantir que nenhum registro é feito
+com idade menor que esse valor diretamente no banco de dados.
+
+## Linguagem de Consulta Estruturada (SQL)
+
+Agora que entendemos melhor como um banco de dados relacional precisamos entender como podemos
+criar e manipular as tabelas e dados dos mesmos.
+
+De maneira geral a forma como manipulamos dados e estruturas em um banco de dados é através do uso
+da [linguagem de consulta estruturada](https://pt.wikipedia.org/wiki/SQL) ou **SQL**.
+
+Como SQL é uma linguagem declarativa simples, no entanto ela pode ser divida em 5 subconjuntos:
+
+1. **DML** ou [Linguagem de manipulação de dados](https://pt.wikipedia.org/wiki/SQL#DML_-_Linguagem_de_Manipula%C3%A7%C3%A3o_de_Dados) (permite manipular os dados em si);
+2. **DDL** ou [Linguagem de definição de dados](https://pt.wikipedia.org/wiki/SQL#DDL_-_Linguagem_de_Defini%C3%A7%C3%A3o_de_Dados) (permite manipular a estrutura das tabelas)
+3. **DCL** ou [Linguagem de controle de dados](https://pt.wikipedia.org/wiki/SQL#DCL_-_Linguagem_de_Controle_de_Dados) (permite controlar o acesso aos dados);
+4. **DTL** ou [Linguagem de transação de dados](https://pt.wikipedia.org/wiki/SQL#DTL_-_Linguagem_de_Transa%C3%A7%C3%A3o_de_Dados) (permite controlar mudanças de dados de maneira atômica);
+5. **DQL** ou [Linguagem de consulta de dados](https://pt.wikipedia.org/wiki/SQL#DQL_-_Linguagem_de_Consulta_de_Dados) (permite consultar dados armazenados);
+
+![sql](images/sql.png)

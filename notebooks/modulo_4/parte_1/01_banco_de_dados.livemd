@@ -1,0 +1,52 @@
+# Módulo V - Capítulo 1 - Banco de dados
+
+## Introdução
+
+Banco de dados é o **armazenamento e organização de informações sobre um domínio específico**.
+
+Simplificando, é o agrupamento de dados que tratam do mesmo assunto, e que precisam ser armazenados para serem utilizados em consultas futuras.
+
+Esses conjuntos de dados são gerenciados por um SGBD (**sistema de gerenciamento de banco de dados**) para que uma pessoa ou aplicação consiga manipular as informações de forma mais simples.
+
+## Sistema de gerenciamento de dados (SGBD)
+
+Hoje, existem diversos tipos de SGBDs, e cada um é adequado para uma necessidade dos clientes.
+
+Os mais comuns são:
+
+* **Oracle**;
+* **MySQL**;
+* **SQL Server**;
+* **PostgreSQL**;
+* **Cassandra**;
+
+Nem todos os SGBDs armazenam os dados da mesma forma. Por conta, disso existem dois de modelos de dados utilizados pelos SGBDs, os relacionais (**SQL**) e não relacionais (**NoSQL**).
+
+## SQL VS NoSQL
+
+Uma das grandes diferenças entre bancos de dados **SQL** e **NoSQL** é como a informação é armazenada. 
+Em bancos de dados **NoSQL** os dados são armazenados todos no mesmo registro enquanto em um banco de dados
+**SQL** os mesmos seram armazenados em tabelas relacionais.
+
+No geral Bancos de dados **SQL** e **NoSQL** tem seus pontos fortes e fracos o que difere a usabilidade
+de caso para caso, mas em resumo enquanto os bancos de dados **SQL** possúem garantia de consistência e estabilidade
+muito maior, principalmente em cenários em que se é necessário gerenciar diversas transações, os bancos de dados
+**NoSQL** são geralmente utilizados em grandes quantidades de dados 
+([Big data](https://pt.wikipedia.org/wiki/Big_data)).
+
+Durante o andamento deste módulo estudaremos o funcionamento de bancos de dados relacionais.
+
+## PosgreSQL
+
+O Postgres é um dos mais avançados sistemas de gerenciamento de banco de dados (**SGBD**) 
+relacionais de código aberto. Ele possui as principais características esperadas de um banco de dados
+relacional para aplicações de grande porte como:
+
+1. **Confiabilidade**: É um dos bancos de dados mais estáveis do mercado, com 99.99999% uptime garantido.
+2. **Eficiência**: Consegue entregar milhares de leituras e escritas por segundo.
+3. **Segurança**: Garantias de que os dados vão se manter consistentes, não vão ser perdidos ou sobrescritos em caso de falhas.
+4. **Praticidade**: Além de possuir o básico que é um linguagem declarativa para consultas e afins, 
+   é um banco com comunidade ativa, atualizações constantes e com uma vasta quantidade de bibliotecas em diversas linguagens.
+5. **Multi-usuários**: Diversos usuários podem operar o banco ao mesmo tempo com diferentes níveis de acesso.
+
+![postgresql](images/postgresql.png)

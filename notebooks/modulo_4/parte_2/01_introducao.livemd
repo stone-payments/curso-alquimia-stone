@@ -1,0 +1,29 @@
+## Introdução
+
+## O que é Ecto?
+
+O [Ecto](https://hexdocs.pm/ecto/Ecto.html) uma ferramenta responsável por mapear modelos em Elixir para tabelas no Banco de Dados, permitindo gerar queries no mesmo através de uma [DSL (Domain Specific Language - Linguagem Específica de Domínio)](https://pt.wikipedia.org/wiki/Linguagem_de_dom%C3%ADnio_espec%C3%ADfico).
+
+## Como é a arquitetura do Ecto?
+
+É composta por 4 módulos principais:
+
+* [Ecto.Repo](https://hexdocs.pm/ecto/Ecto.Repo.html) - É um módulo que permite acessar a base de dados. Através dele conseguimos criar, atualizar e deletar recursos, e executar queries no banco de dados. Para isso é necessário que um adapter específico para o SGBD escolhido esteja instalado e que aplicação esteja configurada corretamente para se autenticar no banco de dados. Para nos conectarmos a bancos de dados relacionais que usam SQL usamos a biblioteca [Ecto SQL](https://hexdocs.pm/ecto_sql/Ecto.Adapters.SQL.html)
+
+* [Ecto.Schema](https://hexdocs.pm/ecto/Ecto.Schema.html) - É um módulo que permite mapear qualquer fonte dados em uma struct Elixir. No nosso caso específico vamos usar para mapear tabelas em structs Elixir.
+
+* [Ecto.Changeset](https://hexdocs.pm/ecto/Ecto.Changeset.html) - módulo que permite normalizar e validar dados do externos do cliente da aplicação. 
+
+* [Ecto.Query](https://hexdocs.pm/ecto/Ecto.Query.html) - módulo que permite fazer queries no banco de dados através de uma DSL em Elixir de forma mais fácil e segura, evitando [SQL Injection](https://owasp.org/www-community/attacks/SQL_Injection) por exemplo.
+
+## Referências
+
+* [1] Ecto - https://hexdocs.pm/ecto/Ecto.html
+* [2] Ecto SQL - https://hexdocs.pm/ecto_sql/Ecto.Adapters.SQL.html
+* [2] Linguagem de domínio específico - https://pt.wikipedia.org/wiki/Linguagem_de_dom%C3%ADnio_espec%C3%ADfico
+* [3] DSL - https://elixir-lang.org/getting-started/meta/domain-specific-languages.html
+* [4] Ecto.Repo - https://hexdocs.pm/ecto/Ecto.Repo.html
+* [5] Ecto.Schema - https://hexdocs.pm/ecto/Ecto.Schema.html
+* [6] Ecto.Changeset - https://hexdocs.pm/ecto/Ecto.Changeset.html
+* [7] Ecto.Query - https://hexdocs.pm/ecto/Ecto.Query.html
+* [8] SQL Injection - https://owasp.org/www-community/attacks/SQL_Injection
