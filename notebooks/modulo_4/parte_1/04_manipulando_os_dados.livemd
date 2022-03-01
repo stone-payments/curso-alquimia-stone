@@ -133,7 +133,7 @@ Postgrex.query(
 ```elixir
 Postgrex.query(
   pid,
-  "DELETE FROM movie WHERE title = 'E.T.'",
+  "DELETE FROM movie WHERE title = 'E.T'",
   []
 )
 ```
